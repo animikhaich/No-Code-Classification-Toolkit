@@ -1,6 +1,11 @@
 import os
 from glob import glob
 import tensorflow as tf
+import matplotlib.pyplot as plt
+
+
+# TODO: Add Augmentations from Albumentations (https://github.com/albumentations-team/albumentations)
+# TODO: Add Tunable Augmentation Loading from a Config File
 
 
 class ImageClassificationDataLoader:
@@ -9,12 +14,20 @@ class ImageClassificationDataLoader:
     def __init__(
         self, data_dir, image_dims=(224, 224), grayscale=False, num_min_samples=500
     ) -> None:
+
+        self.BATCH_SIZE = None
         self.LABELS = []
+        self.AUTOTUNE = tf.data.experimental.AUTOTUNE
+
         self.DATA_DIR = data_dir
         self.WIDTH, self.HEIGHT = image_dims
         self.NUM_CHANNELS = 1 if grayscale else 3
         self.NUM_MIN_SAMPLES = num_min_samples
+
         self.__dataset_verification()
+        self.dataset_files = tf.data.Dataset.list_files(
+            str(os.path.join(self.DATA_DIR, "*/*")), shuffle=True
+        )
 
     def __dataset_verification(self) -> bool:
         # Check if the given directory is a valid directory path
@@ -83,9 +96,6 @@ class ImageClassificationDataLoader:
 
         return image, label
 
-    def __load_config(self) -> None:
-        pass
-
     def get_supported_formats(self) -> str:
         return f"Supported File Extensions: {', '.join(self.__supported_im_formats)}"
 
@@ -102,11 +112,43 @@ class ImageClassificationDataLoader:
     def get_labels(self) -> list:
         return self.LABELS
 
-    def get_num_steps(self) -> None:
-        pass
+    def get_dataset_size(self) -> int:
+        return len(list(self.dataset_files))
 
-    def dataset_generator(self) -> None:
-        pass
+    def get_num_steps(self) -> int:
+        if self.BATCH_SIZE is None:
+            raise AssertionError(
+                f"Batch Size is not Initialized. Call this method only after calling: {self.dataset_generator}"
+            )
+        num_steps = self.get_dataset_size() // self.BATCH_SIZE + 1
+        return num_steps
 
-    def visualize_batch(self) -> None:
-        pass
+    def dataset_generator(self, batch_size=32, augment=False):
+        self.BATCH_SIZE = batch_size
+
+        dataset = self.dataset_files.map(
+            self.__augment_batch, num_parallel_calls=self.AUTOTUNE
+        )
+
+        dataset = dataset.repeat()
+
+        if augment:
+            dataset = dataset.map(
+                self.__augment_batch, num_parallel_calls=self.AUTOTUNE
+            )
+
+        dataset = dataset.batch(batch_size)
+        dataset = dataset.prefetch(buffer_size=self.AUTOTUNE)
+
+        return dataset
+
+    def visualize_batch(self, augment=True) -> None:
+        dataset = self.dataset_generator(batch_size=25, augment=augment)
+        image_batch, label_batch = next(iter(dataset))
+        image_batch, label_batch = image_batch.numpy(), label_batch.numpy()
+        for n in range(len(image_batch)):
+            ax = plt.subplot(5, 5, n + 1)
+            plt.imshow(image_batch[n])
+            plt.title(self.LABELS[label_batch[n]])
+            plt.axis("off")
+        plt.show()
