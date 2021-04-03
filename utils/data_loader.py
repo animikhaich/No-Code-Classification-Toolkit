@@ -117,7 +117,7 @@ class ImageClassificationDataLoader:
         if tf.random.normal([1]) < 0:
             image = tf.image.random_brightness(image, 0.2)
         if self.NUM_CHANNELS == 3 and tf.random.normal([1]) < 0:
-            image = tf.image.random_hue(image, 0.1)
+            image = tf.image.random_hue(image, 0.3)
         if self.NUM_CHANNELS == 3 and tf.random.normal([1]) < 0:
             image = tf.image.random_saturation(image, 0, 15)
 
