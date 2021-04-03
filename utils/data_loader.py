@@ -106,8 +106,8 @@ class ImageClassificationDataLoader:
         img = tf.io.decode_image(
             img, channels=self.NUM_CHANNELS, expand_animations=False
         )
-        img = tf.image.resize(img, [self.HEIGHT, self.WIDTH])
         img = tf.image.convert_image_dtype(img, tf.float32)
+        img = tf.image.resize(img, [self.HEIGHT, self.WIDTH])
 
         return img, tf.cast(label, tf.float32)
 
