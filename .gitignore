@@ -139,5 +139,6 @@ dmypy.json
 # Local History for Visual Studio Code
 .history/
 
-# Specific Folders
+# Specific Files/Folders
 old_data/
+test*

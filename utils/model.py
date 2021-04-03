@@ -13,19 +13,31 @@ os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
 import tensorflow as tf
 from datetime import datetime
-import numpy as np
+
+# TODO: Add Multi-GPU Training Support (https://www.tensorflow.org/guide/distributed_training)
+# TODO: Add XLA Support (https://www.tensorflow.org/xla)
+# TODO: Add Filter Visualization Support
+# TODO: Add Feature Map Visualization Support
+# TODO: Add Custom Architecture Support (Post Feature Extractor)
 
 
 class ImageClassifier:
-    def __init__(self, backbone) -> None:
+    def __init__(
+        self, backbone="ResNet50", optimizer="adam", loss="categorical_crossentropy"
+    ) -> None:
+
+        # Placeholder Initializations
         self.model = None
         self.history = None
         self.metrics = None
         self.callbacks = None
 
-        self.loss = "categorical_crossentropy"
-        self.optimizer = "adam"
-        self.backbone = "ResNet50"
+        # Argument Initializations
+        self.loss = loss
+        self.optimizer = optimizer
+        self.backbone = backbone
+
+        # Default Initializations
         self.timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
         self.keras_weights_path = f"/model/weights/keras/{backbone}_{self.timestamp}.h5"
         self.saved_model_weights_path = (
@@ -38,7 +50,7 @@ class ImageClassifier:
             os.makedirs(path)
         return path
 
-      def get_default_callbacks(self, weights_path, tb_logs_path):
+    def get_default_callbacks(self, weights_path, tb_logs_path):
         early_stop_cb = tf.keras.callbacks.EarlyStopping(
             monitor="val_categorical_accuracy",
             min_delta=0,
@@ -117,6 +129,11 @@ class ImageClassifier:
         ]
         return metrics
 
+    def init_metrics(self, custom_metrics=[]):
+        default_metrics = self.get_default_metrics()
+        self.metrics = default_metrics.extend(custom_metrics)
+        return self.metrics
+
     def get_optimizer(self):
         return self.optimizer
 
@@ -129,17 +146,12 @@ class ImageClassifier:
     def set_loss(self, loss):
         self.loss = loss
 
-    def init_metrics(self, custom_metrics=[]):
-        default_metrics = self.get_default_metrics()
-        self.metrics = default_metrics.extend(custom_metrics)
-        return self.metrics
-
     def get_backbone(self):
         return self.backbone
 
     def set_backbone(self, backbone):
         self.backbone = backbone
-    
+
     def __get_backbone(self, backbone, input_shape=(224, 224, 3), classes=2):
         function_string = f"tf.keras.applications.{backbone}(input_shape={input_shape}, include_top=False, classes={classes})"
         return eval(function_string)
@@ -198,6 +210,15 @@ class ImageClassifier:
 
         self.model.save(save_path)
 
+    def set_precision(self, precision="float32"):
+        tf.keras.mixed_precision.set_global_policy(precision)
+
+    def set_mixed_precision(self, tpu=False):
+        if tpu:
+            self.set_precision("mixed_bfloat16")
+        else:
+            self.set_precision("mixed_float16")
+
     def train(
         self,
         train_generaor,
@@ -236,9 +257,11 @@ class ImageClassifier:
 
     def predict(self, image_batch, preprocess_input=True, custom_preprocessor_fn=None):
         if preprocess_input and not callable(custom_preprocessor_fn):
-            image_batch = tf.keras.applications.imagenet_utils.preprocess_input(image_batch)
+            image_batch = tf.keras.applications.imagenet_utils.preprocess_input(
+                image_batch
+            )
         elif preprocess_input and callable(custom_preprocessor_fn):
             image_batch = custom_preprocessor_fn(image_batch)
-        
+
         predictions = self.model(image_batch)
         return predictions
