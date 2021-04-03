@@ -140,5 +140,6 @@ dmypy.json
 .history/
 
 # Specific Files/Folders
+logs*
 old_data/
 test*

@@ -23,7 +23,12 @@ from datetime import datetime
 
 class ImageClassifier:
     def __init__(
-        self, backbone="ResNet50", optimizer="adam", loss="categorical_crossentropy"
+        self,
+        backbone="ResNet50",
+        input_shape=(224, 224, 3),
+        classes=2,
+        optimizer="sgd",
+        loss="categorical_crossentropy",
     ) -> None:
 
         # Placeholder Initializations
@@ -34,8 +39,10 @@ class ImageClassifier:
 
         # Argument Initializations
         self.loss = loss
-        self.optimizer = optimizer
+        self.classes = classes
         self.backbone = backbone
+        self.optimizer = optimizer
+        self.input_shape = input_shape
 
         # Default Initializations
         self.timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
@@ -93,9 +100,9 @@ class ImageClassifier:
         return callbacks
 
     def init_callbacks(self, weights_path, tb_logs_path, custom_callbacks=[]):
-        default_callbacks = self.get_default_callbacks(weights_path, tb_logs_path)
-        self.metrics = default_callbacks.extend(custom_callbacks)
-        return self.metrics
+        self.callbacks = self.get_default_callbacks(weights_path, tb_logs_path)
+        self.callbacks.extend(custom_callbacks)
+        return self.callbacks
 
     def set_tensorboard_path(self, path):
         self.__create_directory(path)
@@ -130,8 +137,8 @@ class ImageClassifier:
         return metrics
 
     def init_metrics(self, custom_metrics=[]):
-        default_metrics = self.get_default_metrics()
-        self.metrics = default_metrics.extend(custom_metrics)
+        self.metrics = self.get_default_metrics()
+        self.metrics.extend(custom_metrics)
         return self.metrics
 
     def get_optimizer(self):
@@ -156,11 +163,21 @@ class ImageClassifier:
         function_string = f"tf.keras.applications.{backbone}(input_shape={input_shape}, include_top=False, classes={classes})"
         return eval(function_string)
 
-    def init_network(self, backbone, input_shape=(224, 224, 3), classes=2):
-        self.set_backbone(backbone)
+    def set_num_classes(self, num_classes):
+        self.classes = num_classes
 
+    def get_num_classes(self):
+        return self.classes
+
+    def set_input_sape(self, input_shape):
+        self.input_shape = input_shape
+
+    def get_input_shape(self):
+        return self.input_shape
+
+    def init_network(self):
         base = self.__get_backbone(
-            backbone=backbone, input_shape=input_shape, classes=classes
+            backbone=self.backbone, input_shape=self.input_shape, classes=self.classes
         )
         x = base.output
         x = tf.keras.layers.Dropout(0.5)(x)
@@ -168,7 +185,7 @@ class ImageClassifier:
         x = tf.keras.layers.Flatten()(x)
         x = tf.keras.layers.Dense(units=128, activation="relu")(x)
         x = tf.keras.layers.Dropout(0.5)(x)
-        x = tf.keras.layers.Dense(units=classes)(x)
+        x = tf.keras.layers.Dense(units=self.classes)(x)
         x = tf.keras.layers.Activation("softmax", dtype="float32")(x)
 
         self.model = tf.keras.models.Model(inputs=[base.input], outputs=[x])
@@ -181,8 +198,13 @@ class ImageClassifier:
 
     def get_model(self):
         if self.history is None:
-            return f"Please Train The Model First "
+            return f"Please Train The Model First"
         return self.model
+
+    def get_training_history(self):
+        if self.history is None:
+            return f"Please Train The Model First"
+        return self.history
 
     def load_pre_trained_model(self, model_path, saved_model=False):
         if saved_model:
@@ -221,7 +243,7 @@ class ImageClassifier:
 
     def train(
         self,
-        train_generaor,
+        train_generator,
         train_steps,
         val_generator=None,
         val_steps=None,
@@ -235,9 +257,7 @@ class ImageClassifier:
             self.init_callbacks(self.keras_weights_path, self.tensorboard_logs_path)
 
         if self.model is None:
-            raise AssertionError(
-                f"Network not Initialized. Initialize using: `init_network` method"
-            )
+            self.init_network()
 
         self.model.compile(
             loss=self.loss,
@@ -245,7 +265,7 @@ class ImageClassifier:
             metrics=self.metrics,
         )
         self.history = self.model.fit(
-            x=train_generaor,
+            x=train_generator,
             epochs=epochs,
             steps_per_epoch=train_steps,
             validation_data=val_generator,

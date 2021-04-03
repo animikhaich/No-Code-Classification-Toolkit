@@ -23,7 +23,7 @@ import numpy as np
 
 
 class ImageClassificationDataLoader:
-    __supported_im_formats = [".jpg", ".jpeg", ".png", ".bmp"]
+    __supported_im_formats = [".jpg", ".jpeg", ".png"]
 
     def __init__(
         self, data_dir, image_dims=(224, 224), grayscale=False, num_min_samples=500
@@ -103,10 +103,12 @@ class ImageClassificationDataLoader:
     def load_image(self, file_path) -> tuple:
         label = self.get_encoded_labels(file_path)
         img = tf.io.read_file(file_path)
-        img = tf.io.decode_jpeg(img, channels=self.NUM_CHANNELS)
+        img = tf.io.decode_image(
+            img, channels=self.NUM_CHANNELS, expand_animations=False
+        )
+        img = tf.image.resize(img, [self.HEIGHT, self.WIDTH])
         img = tf.image.convert_image_dtype(img, tf.float32)
 
-        img = tf.image.resize(img, [self.HEIGHT, self.WIDTH])
         return img, tf.cast(label, tf.float32)
 
     def augment_batch(self, image, label) -> tuple:
@@ -141,6 +143,9 @@ class ImageClassificationDataLoader:
     def get_labels(self) -> list:
         return self.LABELS
 
+    def get_num_classes(self) -> int:
+        return len(self.LABELS)
+
     def get_dataset_size(self) -> int:
         return len(list(self.dataset_files))
 
@@ -158,6 +163,7 @@ class ImageClassificationDataLoader:
         dataset = self.dataset_files.map(
             self.load_image, num_parallel_calls=self.AUTOTUNE
         )
+        dataset = dataset.apply(tf.data.experimental.ignore_errors())
 
         dataset = dataset.repeat()
 
