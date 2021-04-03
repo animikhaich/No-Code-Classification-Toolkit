@@ -25,6 +25,7 @@ class ImageClassifier:
 
         self.loss = "categorical_crossentropy"
         self.optimizer = "adam"
+        self.backbone = "ResNet50"
         self.timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
         self.keras_weights_path = f"/model/weights/keras/{backbone}_{self.timestamp}.h5"
         self.saved_model_weights_path = (
@@ -36,6 +37,53 @@ class ImageClassifier:
         if not os.path.isdir(path):
             os.makedirs(path)
         return path
+
+      def get_default_callbacks(self, weights_path, tb_logs_path):
+        early_stop_cb = tf.keras.callbacks.EarlyStopping(
+            monitor="val_categorical_accuracy",
+            min_delta=0,
+            patience=10,
+            verbose=1,
+            mode="auto",
+            baseline=None,
+            restore_best_weights=True,
+        )
+        model_ckpt_cb = tf.keras.callbacks.ModelCheckpoint(
+            weights_path,
+            monitor="val_categorical_accuracy",
+            verbose=0,
+            save_best_only=True,
+            save_weights_only=False,
+            mode="auto",
+            save_freq="epoch",
+        )
+        reduce_lr_cb = tf.keras.callbacks.ReduceLROnPlateau(
+            monitor="val_categorical_accuracy",
+            factor=0.2,
+            patience=2,
+            verbose=0,
+            mode="auto",
+            min_delta=0.0001,
+            cooldown=0,
+            min_lr=10e-8,
+        )
+        tensorboard_cb = tf.keras.callbacks.TensorBoard(
+            log_dir=tb_logs_path,
+            histogram_freq=2,
+            write_graph=True,
+            write_images=False,
+            update_freq="epoch",
+            profile_batch=2,
+            embeddings_freq=2,
+            embeddings_metadata=None,
+        )
+        callbacks = [early_stop_cb, model_ckpt_cb, reduce_lr_cb, tensorboard_cb]
+        return callbacks
+
+    def init_callbacks(self, weights_path, tb_logs_path, custom_callbacks=[]):
+        default_callbacks = self.get_default_callbacks(weights_path, tb_logs_path)
+        self.metrics = default_callbacks.extend(custom_callbacks)
+        return self.metrics
 
     def set_tensorboard_path(self, path):
         self.__create_directory(path)
@@ -86,62 +134,22 @@ class ImageClassifier:
         self.metrics = default_metrics.extend(custom_metrics)
         return self.metrics
 
-    def get_default_callbacks(self, weights_path, tb_logs_path):
-        early_stop_cb = tf.keras.callbacks.EarlyStopping(
-            monitor="val_categorical_accuracy",
-            min_delta=0,
-            patience=10,
-            verbose=1,
-            mode="auto",
-            baseline=None,
-            restore_best_weights=True,
-        )
-        model_ckpt_cb = tf.keras.callbacks.ModelCheckpoint(
-            weights_path,
-            monitor="val_categorical_accuracy",
-            verbose=0,
-            save_best_only=True,
-            save_weights_only=False,
-            mode="auto",
-            save_freq="epoch",
-        )
-        reduce_lr_cb = tf.keras.callbacks.ReduceLROnPlateau(
-            monitor="val_categorical_accuracy",
-            factor=0.2,
-            patience=2,
-            verbose=0,
-            mode="auto",
-            min_delta=0.0001,
-            cooldown=0,
-            min_lr=10e-8,
-        )
-        tensorboard_cb = tf.keras.callbacks.TensorBoard(
-            log_dir=tb_logs_path,
-            histogram_freq=2,
-            write_graph=True,
-            write_images=False,
-            update_freq="epoch",
-            profile_batch=2,
-            embeddings_freq=2,
-            embeddings_metadata=None,
-        )
-        callbacks = [early_stop_cb, model_ckpt_cb, reduce_lr_cb, tensorboard_cb]
-        return callbacks
+    def get_backbone(self):
+        return self.backbone
 
-    def init_callbacks(self, weights_path, tb_logs_path, custom_callbacks=[]):
-        default_callbacks = self.get_default_callbacks(weights_path, tb_logs_path)
-        self.metrics = default_callbacks.extend(custom_callbacks)
-        return self.metrics
-
+    def set_backbone(self, backbone):
+        self.backbone = backbone
+    
     def __get_backbone(self, backbone, input_shape=(224, 224, 3), classes=2):
         function_string = f"tf.keras.applications.{backbone}(input_shape={input_shape}, include_top=False, classes={classes})"
         return eval(function_string)
 
-    def init_network(self, backbone="ResNet50", input_shape=(224, 224, 3), classes=2):
+    def init_network(self, backbone, input_shape=(224, 224, 3), classes=2):
+        self.set_backbone(backbone)
+
         base = self.__get_backbone(
             backbone=backbone, input_shape=input_shape, classes=classes
         )
-
         x = base.output
         x = tf.keras.layers.Dropout(0.5)(x)
         x = tf.keras.layers.AveragePooling2D(pool_size=(5, 5))(x)
@@ -226,8 +234,11 @@ class ImageClassifier:
 
         return self.history
 
-    def eval(self):
-        pass
-
-    def predict(self):
-        pass
+    def predict(self, image_batch, preprocess_input=True, custom_preprocessor_fn=None):
+        if preprocess_input and not callable(custom_preprocessor_fn):
+            image_batch = tf.keras.applications.imagenet_utils.preprocess_input(image_batch)
+        elif preprocess_input and callable(custom_preprocessor_fn):
+            image_batch = custom_preprocessor_fn(image_batch)
+        
+        predictions = self.model(image_batch)
+        return predictions
