@@ -117,11 +117,9 @@ class ImageClassificationDataLoader:
         if tf.random.normal([1]) < 0:
             image = tf.image.random_brightness(image, 0.2)
         if self.NUM_CHANNELS == 3 and tf.random.normal([1]) < 0:
-            image = tf.image.random_hue(image, 0.3)
+            image = tf.image.random_hue(image, 0.1)
         if self.NUM_CHANNELS == 3 and tf.random.normal([1]) < 0:
             image = tf.image.random_saturation(image, 0, 15)
-        if tf.random.normal([1]) < 0:
-            image = tf.image.random_flip_up_down(image)
 
         image = tf.image.random_flip_left_right(image)
         image = tf.image.random_jpeg_quality(image, 10, 100)
@@ -197,9 +195,7 @@ class ImageClassificationDataLoader:
 
 
 if __name__ == "__main__":
-    dataset_root_dir = (
-        "/home/ani/Documents/pycodes/Dataset/mit-indoor-scenes/indoorCVPR_09/Images"
-    )
+    dataset_root_dir = "/home/ani/Documents/pycodes/Dataset/gender/Training/"
     data_loader = ImageClassificationDataLoader(
         data_dir=dataset_root_dir,
         image_dims=(512, 512),

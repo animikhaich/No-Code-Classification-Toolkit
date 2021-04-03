@@ -180,8 +180,8 @@ class ImageClassifier:
             backbone=self.backbone, input_shape=self.input_shape, classes=self.classes
         )
         x = base.output
+        x = tf.keras.layers.Conv2D(64, (1, 1), activation="relu")(x)
         x = tf.keras.layers.Dropout(0.5)(x)
-        x = tf.keras.layers.AveragePooling2D(pool_size=(5, 5))(x)
         x = tf.keras.layers.Flatten()(x)
         x = tf.keras.layers.Dense(units=128, activation="relu")(x)
         x = tf.keras.layers.Dropout(0.5)(x)
@@ -191,10 +191,10 @@ class ImageClassifier:
         self.model = tf.keras.models.Model(inputs=[base.input], outputs=[x])
         return self.model
 
-    def get_model_summary(self):
+    def print_model_summary(self):
         if self.model is None:
             return f"Please use the `init_network` Method to  the model first"
-        return self.model.summary()
+        self.model.summary()
 
     def get_model(self):
         if self.history is None:
@@ -248,6 +248,7 @@ class ImageClassifier:
         val_generator=None,
         val_steps=None,
         epochs=500,
+        print_summary=False,
     ):
 
         if self.metrics is None:
@@ -264,6 +265,10 @@ class ImageClassifier:
             optimizer=self.optimizer,
             metrics=self.metrics,
         )
+
+        if print_summary:
+            self.model.summary()
+
         self.history = self.model.fit(
             x=train_generator,
             epochs=epochs,
