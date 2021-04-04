@@ -9,10 +9,11 @@ import tensorflow as tf
 import streamlit as st
 import numpy as np
 import pandas as pd
-import time
+import plotly.graph_objs as go
 
 # TODO: Add Support For Learning Rate Change
 # TODO: Add Support For Dynamic Polt.ly Charts
+# TODO: Add Support For Live Training Graphs (on_train_batch_end) without slowing down the Training Process
 
 OPTIMIZERS = {
     "SGD": tf.keras.optimizers.SGD(),
@@ -29,31 +30,77 @@ BATCH_SIZES = [1, 2, 4, 8, 16, 32, 64, 128, 256]
 
 
 class CustomCallback(tf.keras.callbacks.Callback):
-    def __init__(self, total_steps):
-        self.total_steps = total_steps
-        self.loss_chart = st.line_chart(pd.DataFrame({"Loss": []}))
-        self.acc_precision_recall_chart = st.line_chart()
+    def __init__(self, num_steps):
+        self.num_steps = num_steps
+
+        # Constants (TODO: Need to Optimize)
+        self.train_losses = []
+        self.val_losses = []
+        self.train_accuracies = []
+        self.val_accuracies = []
+
+        # Progress
+        self.epoch_text = st.empty()
         self.batch_progress = st.progress(0)
+        self.status_text = st.empty()
 
-        super().__init__()
+        # Charts
+        self.loss_chart = st.empty()
+        self.accuracy_chart = st.empty()
 
-    def __stream_to_graph(self, chart_obj, values):
-        chart_obj.add_rows(np.array([values]))
-
-    def __update_progress_bar(self, batch):
-        current_progress = int(batch / self.total_steps * 100)
-        self.batch_progress.progress(current_progress)
+    def update_graph(self, placeholder, items, title, xaxis, yaxis):
+        fig = go.Figure()
+        for key in items.keys():
+            fig.add_trace(
+                go.Scatter(
+                    y=items[key],
+                    mode="lines+markers",
+                    name=key,
+                )
+            )
+        fig.update_layout(title=title, xaxis_title=xaxis, yaxis_title=yaxis)
+        placeholder.write(fig)
 
     def on_train_batch_end(self, batch, logs=None):
+        self.batch_progress.progress(batch / self.num_steps)
 
-        loss = logs["loss"]
-        accuracy = logs["categorical_accuracy"]
-        precision = logs["precision"]
-        recall = logs["recall"]
+    def on_epoch_begin(self, epoch, logs=None):
+        self.epoch_text.text(f"Epoch: {epoch + 1}")
 
-        self.__stream_to_graph(self.loss_chart, loss)
-        self.__stream_to_graph(self.acc_precision_recall_chart, accuracy)
-        self.__update_progress_bar(batch)
+    def on_train_begin(self, logs=None):
+        self.status_text.info(
+            "Training Started! Live Graphs will be shown on the completion of the First Epoch"
+        )
+
+    def on_train_end(self, logs=None):
+        self.status_text.success("Training Completed!")
+        st.balloons()
+
+    def on_epoch_end(self, epoch, logs=None):
+
+        self.train_losses.append(logs["loss"])
+        self.val_losses.append(logs["val_loss"])
+        self.train_accuracies.append(logs["categorical_accuracy"])
+        self.val_accuracies.append(logs["val_categorical_accuracy"])
+
+        self.update_graph(
+            self.loss_chart,
+            {"Train Loss": self.train_losses, "Val Loss": self.val_losses},
+            "Loss Curves",
+            "Epochs",
+            "Loss",
+        )
+
+        self.update_graph(
+            self.accuracy_chart,
+            {
+                "Train Accuracy": self.train_accuracies,
+                "Val Accuracy": self.val_accuracies,
+            },
+            "Accuracy Curves",
+            "Epochs",
+            "Accuracy",
+        )
 
 
 st.title("Zero Code Tensorflow Classifier Trainer")
@@ -64,11 +111,11 @@ with st.sidebar:
     # Enter Path for Train and Val Dataset
     train_data_dir = st.text_input(
         "Train Data Directory (Absolute Path)",
-        "/home/ani/Documents/pycodes/Dataset/gender/Training/",
+        "/home/ani/Documents/pycodes/Dataset/gender/Sample/",
     )
     val_data_dir = st.text_input(
         "Validation Data Directory (Absolute Path)",
-        "/home/ani/Documents/pycodes/Dataset/gender/Validation/",
+        "/home/ani/Documents/pycodes/Dataset/gender/Sample/",
     )
 
     # Enter Path for Model Weights and Training Logs (Tensorboard)
@@ -86,7 +133,7 @@ with st.sidebar:
     selected_batch_size = st.select_slider("Train/Eval Batch Size", BATCH_SIZES, 16)
 
     # Select Number of Epochs
-    selected_epochs = st.number_input("Max Number of Epochs", 100)
+    selected_epochs = st.number_input("Max Number of Epochs", 1, 300000, 100)
 
     # Start Training Button
     start_training = st.button("Start Training")
@@ -96,14 +143,14 @@ if start_training:
         data_dir=train_data_dir,
         image_dims=(224, 224),
         grayscale=False,
-        num_min_samples=1000,
+        num_min_samples=100,
     )
 
     val_data_loader = ImageClassificationDataLoader(
         data_dir=val_data_dir,
         image_dims=(224, 224),
         grayscale=False,
-        num_min_samples=1000,
+        num_min_samples=100,
     )
 
     train_generator = train_data_loader.dataset_generator(
@@ -114,7 +161,7 @@ if start_training:
     )
 
     classifier = ImageClassifier(
-        backbone="ResNet50V2",
+        backbone="EfficientNetB0",
         input_shape=(224, 224, 3),
         classes=train_data_loader.get_num_classes(),
     )
