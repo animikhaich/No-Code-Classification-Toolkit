@@ -14,6 +14,7 @@ import plotly.graph_objs as go
 # TODO: Add Support For Learning Rate Change
 # TODO: Add Support For Dynamic Polt.ly Charts
 # TODO: Add Support For Live Training Graphs (on_train_batch_end) without slowing down the Training Process
+# TODO: Add Supoort For EfficientNet - Fix Data Loader Input to be Un-Normalized Images
 
 OPTIMIZERS = {
     "SGD": tf.keras.optimizers.SGD(),
@@ -27,6 +28,27 @@ OPTIMIZERS = {
 }
 
 BATCH_SIZES = [1, 2, 4, 8, 16, 32, 64, 128, 256]
+
+BACKBONES = [
+    "MobileNet",
+    "MobileNetV2",
+    "ResNet50",
+    "ResNet101",
+    "ResNet152",
+    "ResNet50V2",
+    "ResNet101V2",
+    "ResNet152V2",
+    "VGG16",
+    "VGG19",
+    "Xception",
+    "InceptionV3",
+    "InceptionResNetV2",
+    "DenseNet121",
+    "DenseNet169",
+    "DenseNet201",
+    "NASNetMobile",
+    "NASNetLarge",
+]
 
 
 class CustomCallback(tf.keras.callbacks.Callback):
@@ -69,11 +91,13 @@ class CustomCallback(tf.keras.callbacks.Callback):
 
     def on_train_begin(self, logs=None):
         self.status_text.info(
-            "Training Started! Live Graphs will be shown on the completion of the First Epoch"
+            "Training Started! Live Graphs will be shown on the completion of the First Epoch."
         )
 
     def on_train_end(self, logs=None):
-        self.status_text.success("Training Completed!")
+        self.status_text.success(
+            f"Training Completed! Final Validation Accuracy: {logs['val_categorical_accuracy']*100:.2f}%"
+        )
         st.balloons()
 
     def on_epoch_end(self, epoch, logs=None):
@@ -126,6 +150,9 @@ with st.sidebar:
         "Tensorboard Logs Directory (Absolute Path)", "logs/tensorboard"
     )
 
+    # Select Backbone
+    selected_backbone = st.selectbox("Select Backbone", BACKBONES)
+
     # Select Optimizer
     selected_optimizer = st.selectbox("Training Optimizer", list(OPTIMIZERS.keys()))
 
@@ -133,7 +160,10 @@ with st.sidebar:
     selected_batch_size = st.select_slider("Train/Eval Batch Size", BATCH_SIZES, 16)
 
     # Select Number of Epochs
-    selected_epochs = st.number_input("Max Number of Epochs", 1, 300000, 100)
+    selected_epochs = st.number_input("Max Number of Epochs", 1, 500, 100)
+
+    # Select Number of Epochs
+    selected_input_shape = st.number_input("Input Image Shape", 64, 2000, 224)
 
     # Start Training Button
     start_training = st.button("Start Training")
@@ -161,7 +191,7 @@ if start_training:
     )
 
     classifier = ImageClassifier(
-        backbone="EfficientNetB0",
+        backbone=selected_backbone,
         input_shape=(224, 224, 3),
         classes=train_data_loader.get_num_classes(),
     )
@@ -170,8 +200,6 @@ if start_training:
     classifier.set_tensorboard_path(tensorboard_logs_path)
 
     classifier.init_callbacks(
-        keras_weights_path,
-        tensorboard_logs_path,
         [CustomCallback(train_data_loader.get_num_steps())],
     )
 

@@ -99,8 +99,10 @@ class ImageClassifier:
         callbacks = [early_stop_cb, model_ckpt_cb, reduce_lr_cb, tensorboard_cb]
         return callbacks
 
-    def init_callbacks(self, weights_path, tb_logs_path, custom_callbacks=[]):
-        self.callbacks = self.get_default_callbacks(weights_path, tb_logs_path)
+    def init_callbacks(self, custom_callbacks=[]):
+        self.callbacks = self.get_default_callbacks(
+            self.keras_weights_path, self.tensorboard_logs_path
+        )
         self.callbacks.extend(custom_callbacks)
         return self.callbacks
 
@@ -180,8 +182,6 @@ class ImageClassifier:
             backbone=self.backbone, input_shape=self.input_shape, classes=self.classes
         )
         x = base.output
-        x = tf.keras.layers.Conv2D(64, (1, 1), activation="relu")(x)
-        x = tf.keras.layers.Dropout(0.5)(x)
         x = tf.keras.layers.Flatten()(x)
         x = tf.keras.layers.Dense(units=128, activation="relu")(x)
         x = tf.keras.layers.Dropout(0.5)(x)
