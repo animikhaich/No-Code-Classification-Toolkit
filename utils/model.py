@@ -46,11 +46,11 @@ class ImageClassifier:
 
         # Default Initializations
         self.timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
-        self.keras_weights_path = f"/model/weights/keras/{backbone}_{self.timestamp}.h5"
+        self.keras_weights_path = f"model/weights/keras/{backbone}_{self.timestamp}.h5"
         self.saved_model_weights_path = (
-            f"/model/weights/savedmodel/{backbone}_{self.timestamp}/"
+            f"model/weights/savedmodel/{backbone}_{self.timestamp}"
         )
-        self.tensorboard_logs_path = f"/model/logs/{backbone}_{self.timestamp}/"
+        self.tensorboard_logs_path = f"logs/tensorboard/{backbone}_{self.timestamp}"
 
     def __create_directory(self, path):
         if not os.path.isdir(path):
@@ -171,7 +171,7 @@ class ImageClassifier:
     def get_num_classes(self):
         return self.classes
 
-    def set_input_sape(self, input_shape):
+    def set_input_shape(self, input_shape):
         self.input_shape = input_shape
 
     def get_input_shape(self):

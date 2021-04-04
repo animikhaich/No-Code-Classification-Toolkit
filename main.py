@@ -5,6 +5,7 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
 
 from utils.data_loader import ImageClassificationDataLoader
 from utils.model import ImageClassifier
+from threading import Thread
 import tensorflow as tf
 import streamlit as st
 import numpy as np
@@ -27,27 +28,34 @@ OPTIMIZERS = {
     "FTRL": tf.keras.optimizers.Ftrl(),
 }
 
+TRAINING_PRECISION = {
+    "Full Precision (FP32)": "float32",
+    "Mixed Precision (GPU - FP16) ": "mixed_float16",
+    "Mixed Precision (TPU - BF16) ": "mixed_bfloat16",
+}
+
+
 BATCH_SIZES = [1, 2, 4, 8, 16, 32, 64, 128, 256]
 
 BACKBONES = [
-    "MobileNet",
     "MobileNetV2",
+    "ResNet50V2",
+    "Xception",
+    "InceptionV3",
+    "VGG16",
+    "VGG19",
     "ResNet50",
     "ResNet101",
     "ResNet152",
-    "ResNet50V2",
     "ResNet101V2",
     "ResNet152V2",
-    "VGG16",
-    "VGG19",
-    "Xception",
-    "InceptionV3",
     "InceptionResNetV2",
     "DenseNet121",
     "DenseNet169",
     "DenseNet201",
     "NASNetMobile",
     "NASNetLarge",
+    "MobileNet",
 ]
 
 
@@ -135,19 +143,11 @@ with st.sidebar:
     # Enter Path for Train and Val Dataset
     train_data_dir = st.text_input(
         "Train Data Directory (Absolute Path)",
-        "/home/ani/Documents/pycodes/Dataset/gender/Sample/",
+        "/home/ani/Documents/pycodes/Dataset/gender/Training/",
     )
     val_data_dir = st.text_input(
         "Validation Data Directory (Absolute Path)",
-        "/home/ani/Documents/pycodes/Dataset/gender/Sample/",
-    )
-
-    # Enter Path for Model Weights and Training Logs (Tensorboard)
-    keras_weights_path = st.text_input(
-        "Keras Weights File Path (Absolute Path)", "logs/models/weights.h5"
-    )
-    tensorboard_logs_path = st.text_input(
-        "Tensorboard Logs Directory (Absolute Path)", "logs/tensorboard"
+        "/home/ani/Documents/pycodes/Dataset/gender/Validation/",
     )
 
     # Select Backbone
@@ -162,23 +162,30 @@ with st.sidebar:
     # Select Number of Epochs
     selected_epochs = st.number_input("Max Number of Epochs", 1, 500, 100)
 
-    # Select Number of Epochs
-    selected_input_shape = st.number_input("Input Image Shape", 64, 2000, 224)
+    # Select Input Image Shape
+    selected_input_shape = st.number_input("Input Image Shape", 64, 600, 224)
+
+    # Mixed Precision Training
+    selected_precision = st.selectbox(
+        "Training Precision", list(TRAINING_PRECISION.keys())
+    )
 
     # Start Training Button
     start_training = st.button("Start Training")
 
 if start_training:
+    input_shape = (selected_input_shape, selected_input_shape, 3)
+
     train_data_loader = ImageClassificationDataLoader(
         data_dir=train_data_dir,
-        image_dims=(224, 224),
+        image_dims=input_shape[:2],
         grayscale=False,
         num_min_samples=100,
     )
 
     val_data_loader = ImageClassificationDataLoader(
         data_dir=val_data_dir,
-        image_dims=(224, 224),
+        image_dims=input_shape[:2],
         grayscale=False,
         num_min_samples=100,
     )
@@ -192,18 +199,15 @@ if start_training:
 
     classifier = ImageClassifier(
         backbone=selected_backbone,
-        input_shape=(224, 224, 3),
+        input_shape=input_shape,
         classes=train_data_loader.get_num_classes(),
+        optimizer=selected_optimizer,
     )
-
-    classifier.set_keras_weights_path(keras_weights_path)
-    classifier.set_tensorboard_path(tensorboard_logs_path)
 
     classifier.init_callbacks(
         [CustomCallback(train_data_loader.get_num_steps())],
     )
-
-    classifier.set_optimizer(selected_optimizer)
+    classifier.set_precision(TRAINING_PRECISION[selected_precision])
 
     classifier.train(
         train_generator,
