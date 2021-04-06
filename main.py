@@ -1,3 +1,12 @@
+__author__ = "Animikh Aich"
+__copyright__ = "Copyright 2021, Animikh Aich"
+__credits__ = ["Animikh Aich"]
+__license__ = "MIT"
+__version__ = "0.1.0"
+__maintainer__ = "Animikh Aich"
+__email__ = "animikhaich@gmail.com"
+__status__ = "staging"
+
 import os
 
 os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
@@ -12,10 +21,15 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 
-# TODO: Add Support For Dynamic Polt.ly Charts
 # TODO: Add Support For Live Training Graphs (on_train_batch_end) without slowing down the Training Process
 # TODO: Add Supoort For EfficientNet - Fix Data Loader Input to be Un-Normalized Images
+# TODO: Add Supoort For Experiment and Logs Tracking and Comparison to Past Experiments
+# TODO: Add Support For Dataset Visualization
+# TODO: Add Support for Augmented Batch Visualization
+# TODO: Add Support for Augmentation Hyperparameter Customization (More Granular Control)
 
+
+# Constant Values that are Pre-defined for the dashboard to function
 OPTIMIZERS = {
     "SGD": tf.keras.optimizers.SGD(),
     "RMSprop": tf.keras.optimizers.RMSprop(),
@@ -32,7 +46,6 @@ TRAINING_PRECISION = {
     "Mixed Precision (GPU - FP16) ": "mixed_float16",
     "Mixed Precision (TPU - BF16) ": "mixed_bfloat16",
 }
-
 
 LEARNING_RATES = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1]
 
@@ -60,8 +73,29 @@ BACKBONES = [
 ]
 
 
+st.title("Zero Code Tensorflow Classifier Trainer")
+
+
 class CustomCallback(tf.keras.callbacks.Callback):
+    """
+    CustomCallback Keras Callback to Send Updates to Streamlit Dashboard
+
+    - Inherits from tf.keras.callbacks.Callback class
+    - Sends Live Updates to the Dashboard
+    - Allows Plotting Live Loss and Accuracy Curves
+    - Allows Updating of Progress bar to track batch progress
+    - Live plot only support Epoch Loss & Accuracy to improve training speed
+    """
+
     def __init__(self, num_steps):
+        """
+        __init__
+
+        Value Initializations
+
+        Args:
+            num_steps (int): Total Number of Steps per Epoch
+        """
         self.num_steps = num_steps
 
         # Constants (TODO: Need to Optimize)
@@ -80,6 +114,19 @@ class CustomCallback(tf.keras.callbacks.Callback):
         self.accuracy_chart = st.empty()
 
     def update_graph(self, placeholder, items, title, xaxis, yaxis):
+        """
+        update_graph Function to Update the plot.ly graphs on Streamlit
+
+        - Updates the Graphs Whenever called with the passed values
+        - Only supports Line plots for now
+
+        Args:
+            placeholder (st.empty()): streamlit placeholder object
+            items (dict): Containing Name of the plot and values
+            title (str): Title of the Plot
+            xaxis (str): X-Axis Label
+            yaxis (str): Y-Axis Label
+        """
         fig = go.Figure()
         for key in items.keys():
             fig.add_trace(
@@ -93,24 +140,68 @@ class CustomCallback(tf.keras.callbacks.Callback):
         placeholder.write(fig)
 
     def on_train_batch_end(self, batch, logs=None):
+        """
+        on_train_batch_end Update Progress Bar
+
+        At the end of each Training Batch, Update the progress bar
+
+        Args:
+            batch (int): Current batch number
+            logs (dict, optional): Training Metrics. Defaults to None.
+        """
         self.batch_progress.progress(batch / self.num_steps)
 
     def on_epoch_begin(self, epoch, logs=None):
+        """
+        on_epoch_begin
+
+        Update the Dashboard on the Current Epoch Number
+
+        Args:
+            batch (int): Current batch number
+            logs (dict, optional): Training Metrics. Defaults to None.
+        """
         self.epoch_text.text(f"Epoch: {epoch + 1}")
 
     def on_train_begin(self, logs=None):
+        """
+        on_train_begin
+
+        Status Update for the Dashboard with a message that training has started
+
+        Args:
+            batch (int): Current batch number
+            logs (dict, optional): Training Metrics. Defaults to None.
+        """
         self.status_text.info(
             "Training Started! Live Graphs will be shown on the completion of the First Epoch."
         )
 
     def on_train_end(self, logs=None):
+        """
+        on_train_end
+
+        Status Update for the Dashboard with a message that training has ended
+
+        Args:
+            batch (int): Current batch number
+            logs (dict, optional): Training Metrics. Defaults to None.
+        """
         self.status_text.success(
             f"Training Completed! Final Validation Accuracy: {logs['val_categorical_accuracy']*100:.2f}%"
         )
         st.balloons()
 
     def on_epoch_end(self, epoch, logs=None):
+        """
+        on_epoch_end
 
+        Update the Graphs with the train & val loss & accuracy curves (metrics)
+
+        Args:
+            batch (int): Current batch number
+            logs (dict, optional): Training Metrics. Defaults to None.
+        """
         self.train_losses.append(logs["loss"])
         self.val_losses.append(logs["val_loss"])
         self.train_accuracies.append(logs["categorical_accuracy"])
@@ -136,8 +227,7 @@ class CustomCallback(tf.keras.callbacks.Callback):
         )
 
 
-st.title("Zero Code Tensorflow Classifier Trainer")
-
+# Sidebar Configuration Parameters
 with st.sidebar:
     st.header("Training Configuration")
 
@@ -158,7 +248,7 @@ with st.sidebar:
     selected_optimizer = st.selectbox("Training Optimizer", list(OPTIMIZERS.keys()))
 
     # Select Learning Rate
-    selected_learning_rate = st.select_slider("Learning Rate", LEARNING_RATES, 0.01)
+    selected_learning_rate = st.select_slider("Learning Rate", LEARNING_RATES, 0.001)
 
     # Select Batch Size
     selected_batch_size = st.select_slider("Train/Eval Batch Size", BATCH_SIZES, 16)
@@ -177,9 +267,12 @@ with st.sidebar:
     # Start Training Button
     start_training = st.button("Start Training")
 
+# If the Button is pressed, start Training
 if start_training:
+    # Init the Input Shape for the Image
     input_shape = (selected_input_shape, selected_input_shape, 3)
 
+    # Init Training Data Loader
     train_data_loader = ImageClassificationDataLoader(
         data_dir=train_data_dir,
         image_dims=input_shape[:2],
@@ -187,6 +280,7 @@ if start_training:
         num_min_samples=100,
     )
 
+    # Init Validation Data Loader
     val_data_loader = ImageClassificationDataLoader(
         data_dir=val_data_dir,
         image_dims=input_shape[:2],
@@ -194,6 +288,7 @@ if start_training:
         num_min_samples=100,
     )
 
+    # Get Training & Validation Dataset Generators
     train_generator = train_data_loader.dataset_generator(
         batch_size=selected_batch_size, augment=True
     )
@@ -201,8 +296,10 @@ if start_training:
         batch_size=selected_batch_size, augment=False
     )
 
+    # Set the Learning Rate for the Selected Optimizer
     OPTIMIZERS[selected_optimizer].learning_rate.assign(selected_learning_rate)
 
+    # Init the Classification Trainier
     classifier = ImageClassifier(
         backbone=selected_backbone,
         input_shape=input_shape,
@@ -210,11 +307,14 @@ if start_training:
         optimizer=OPTIMIZERS[selected_optimizer],
     )
 
+    # Set the Callbacks to include the custom callback (to stream progress to dashboard)
     classifier.init_callbacks(
         [CustomCallback(train_data_loader.get_num_steps())],
     )
+    # Enable or Disable Mixed Precision Training
     classifier.set_precision(TRAINING_PRECISION[selected_precision])
 
+    # Start Training
     classifier.train(
         train_generator,
         train_data_loader.get_num_steps(),
