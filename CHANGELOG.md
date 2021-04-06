@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Frontend**:
   - Streamlit Dashboard For Easy Training and Visualization
   - Epoch Count and Batch Progress Bar
+  - Live Training & Validation Loss & Accuracy Plots on the dashboard using Plot.ly Graphs
   - Training and Validation Data Directory
   - Model Backbone Selector
   - Training Optimizer Selector
