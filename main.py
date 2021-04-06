@@ -75,9 +75,9 @@ BACKBONES = [
 
 MARKDOWN_TEXT = """
 
-Don't know How to Write Complex Python Programs? Feeling Too Lazy to code a complete Deep Learning Training Pipeline Again? Need to Quickly Prototype a Image Classification Model?
+Don't know How to Write Complex Python Programs? Feeling Too Lazy to code a complete Deep Learning Training Pipeline Again? Need to Quickly Prototype an Image Classification Model?
 
-Okay, Let's get to the main part. This is a **Containerized Deep Learning-based Image Classifier Training Tool** that allows anybody with some basic understanding of Hyperparameter Tuning to start training a Image Classification Model.
+Okay, Let's get to the main part. This is a **Containerized Deep Learning-based Image Classifier Training Tool** that allows anybody with some basic understanding of Hyperparameter Tuning to start training an Image Classification Model.
 
 For the Developer/Contributor: The code is easy to maintain and work with. No Added Complexity. Anyone can download and build a Docker Image to get it up and running with the build script.
 
@@ -88,6 +88,7 @@ For the Developer/Contributor: The code is easy to maintain and work with. No Ad
 - **Live and Interactive Plots** - Want to know how your training is progressing? Easy! Visualize and compare the results live, on your dashboard and watch the exponentially decaying loss curve build up from scratch!
 
 **Source Code & Documentation:** https://github.com/animikhaich/Zero-Code-TF-Classifier
+**YouTube Video Link:** https://youtu.be/gbuweKMOucc
 
 ### **Author Details**
 #### Animikh Aich
