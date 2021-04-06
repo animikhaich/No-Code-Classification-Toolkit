@@ -1,1 +1,1 @@
-parallel -u ::: "streamlit run main.py" "tensorboard --logdir logs/tensorboard --host 0.0.0.0 --port 6006"
+parallel -u ::: "streamlit run main.py" "tensorboard --logdir logs/tensorboard --host 0.0.0.0"

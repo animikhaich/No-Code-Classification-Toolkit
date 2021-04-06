@@ -1,1 +1,1 @@
-docker build . -t zero-code-tf-classifier
+docker build . -t animikhaich/zero-code-tf-classifier
