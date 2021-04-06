@@ -7,9 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version 0.1.0 Beta - 2021-04-06
 ### Added
+- Dockerfile
+- Launch Script (Dependency: [GNU Parallel](https://www.gnu.org/software/parallel/))
+- Automatic Tensorboard Initialization (Using the Launch Script) on Port 6006
 - **Frontend**:
   - Streamlit Dashboard For Easy Training and Visualization
-  - Epoch Count and Batch Progress Bar
+  - Epoch Count and Batch Progress Bar with Training Status Message
   - Live Training & Validation Loss & Accuracy Plots on the dashboard using Plot.ly Graphs
   - Training and Validation Data Directory
   - Model Backbone Selector
@@ -20,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Input Image Shape Selector
   - Training Precision Selector
   - Training Button
+  - Status Update with Final Validation Accuracy and Balloons Animation on Completion
 - **Data Loader**:
   - Optimized Tf.Data implementation for maximum GPU usage
   - Automatically handle errors such as corrupted images
