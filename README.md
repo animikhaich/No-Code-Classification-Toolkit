@@ -191,6 +191,6 @@ Distributed under the MIT License. See [LICENSE](LICENSE.md) for more informatio
 [issues-shield]: https://img.shields.io/github/issues/animikhaich/Zero-Code-TF-Classifier.svg?style=flat-square
 [issues-url]: https://github.com/animikhaich/Zero-Code-TF-Classifier/issues
 [license-shield]: https://img.shields.io/github/license/animikhaich/Semantic-Segmentation-using-AutoEncoders.svg?style=flat-square
-[license-url]: https://github.com/animikhaich/Zero-Code-TF-Classifier/blob/master/LICENSE
+[license-url]: https://github.com/animikhaich/Zero-Code-TF-Classifier/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/animikh-aich/
