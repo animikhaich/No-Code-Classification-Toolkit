@@ -73,6 +73,33 @@ BACKBONES = [
 ]
 
 
+MARKDOWN_TEXT = """
+
+Don't know How to Write Complex Python Programs? Feeling Too Lazy to code a complete Deep Learning Training Pipeline Again? Need to Quickly Prototype a Image Classification Model?
+
+Okay, Let's get to the main part. This is a **Containerized Deep Learning-based Image Classifier Training Tool** that allows anybody with some basic understanding of Hyperparameter Tuning to start training a Image Classification Model.
+
+For the Developer/Contributor: The code is easy to maintain and work with. No Added Complexity. Anyone can download and build a Docker Image to get it up and running with the build script.
+
+### **Features**
+
+- **Zero Coding Required** - I have said this enough, I will repeat one last time: No need to touch any programming language, just a few clicks and start training!
+- **Easy to use UI Interface** - Built with Streamlit, it is a very user friendly, straight forward UI that anybody can use with ease. Just a few selects and a few sliders, and start training. Simple!
+- **Live and Interactive Plots** - Want to know how your training is progressing? Easy! Visualize and compare the results live, on your dashboard and watch the exponentially decaying loss curve build up from scratch!
+
+**Source Code & Documentation:** https://github.com/animikhaich/Zero-Code-TF-Classifier
+
+### **Author Details**
+#### Animikh Aich
+
+- Website: [Animikh Aich - Website](http://www.animikh.me/)
+- LinkedIn: [animikh-aich](https://www.linkedin.com/in/animikh-aich/)
+- Email: [animikhaich@gmail.com](mailto:animikhaich@gmail.com)
+- Twitter: [@AichAnimikh](https://twitter.com/AichAnimikh)
+
+"""
+
+
 st.title("Zero Code Tensorflow Classifier Trainer")
 
 
@@ -234,11 +261,9 @@ with st.sidebar:
     # Enter Path for Train and Val Dataset
     train_data_dir = st.text_input(
         "Train Data Directory (Absolute Path)",
-        "/home/ani/Documents/pycodes/Dataset/gender/Training/",
     )
     val_data_dir = st.text_input(
         "Validation Data Directory (Absolute Path)",
-        "/home/ani/Documents/pycodes/Dataset/gender/Validation/",
     )
 
     # Select Backbone
@@ -323,3 +348,5 @@ if start_training:
         epochs=selected_epochs,
         print_summary=False,
     )
+else:
+    st.markdown(MARKDOWN_TEXT)
