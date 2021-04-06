@@ -12,7 +12,6 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 
-# TODO: Add Support For Learning Rate Change
 # TODO: Add Support For Dynamic Polt.ly Charts
 # TODO: Add Support For Live Training Graphs (on_train_batch_end) without slowing down the Training Process
 # TODO: Add Supoort For EfficientNet - Fix Data Loader Input to be Un-Normalized Images
@@ -34,6 +33,8 @@ TRAINING_PRECISION = {
     "Mixed Precision (TPU - BF16) ": "mixed_bfloat16",
 }
 
+
+LEARNING_RATES = [0.00001, 0.0001, 0.001, 0.01, 0.1, 1]
 
 BATCH_SIZES = [1, 2, 4, 8, 16, 32, 64, 128, 256]
 
@@ -156,6 +157,9 @@ with st.sidebar:
     # Select Optimizer
     selected_optimizer = st.selectbox("Training Optimizer", list(OPTIMIZERS.keys()))
 
+    # Select Learning Rate
+    selected_learning_rate = st.select_slider("Learning Rate", LEARNING_RATES, 0.01)
+
     # Select Batch Size
     selected_batch_size = st.select_slider("Train/Eval Batch Size", BATCH_SIZES, 16)
 
@@ -197,11 +201,13 @@ if start_training:
         batch_size=selected_batch_size, augment=False
     )
 
+    OPTIMIZERS[selected_optimizer].learning_rate.assign(selected_learning_rate)
+
     classifier = ImageClassifier(
         backbone=selected_backbone,
         input_shape=input_shape,
         classes=train_data_loader.get_num_classes(),
-        optimizer=selected_optimizer,
+        optimizer=OPTIMIZERS[selected_optimizer],
     )
 
     classifier.init_callbacks(
