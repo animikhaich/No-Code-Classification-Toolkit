@@ -4,8 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
 
-## Version 0.1.0 Beta - 2021-04-06
+### Modified
+- Re-shuffling:
+  - `utils/data_loader.py` -> `core/data_loader.py`
+  - `utils/model.py` -> `core/model.py`
+- Moved Custom Callbacks to new file: `utils/add_ons.py`
+
+
+## [Version 0.1.0 Beta] - 2021-04-06
 ### Added
 - Dockerfile
 - Launch Script (Dependency: [GNU Parallel](https://www.gnu.org/software/parallel/))
@@ -80,3 +88,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Adamax
   - Nadam
   - FTRL
+
+
+[Version 0.1.0 Beta]: https://github.com/animikhaich/Zero-Code-TF-Classifier/releases/tag/v0.1-beta
