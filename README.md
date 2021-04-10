@@ -176,7 +176,7 @@ Contributions are what make the open source community such an amazing place to b
 
 ## License
 
-Distributed under the MIT License. See [LICENSE](LICENSE.md) for more information.
+Distributed under the [GNU AGPL V3 License](https://choosealicense.com/licenses/agpl-3.0/). See [LICENSE](LICENSE) for more information.
 
 
 ## Contact
@@ -197,7 +197,7 @@ Distributed under the MIT License. See [LICENSE](LICENSE.md) for more informatio
 [stars-url]: https://github.com/animikhaich/Zero-Code-TF-Classifier/stargazers
 [issues-shield]: https://img.shields.io/github/issues/animikhaich/Zero-Code-TF-Classifier.svg?style=flat-square
 [issues-url]: https://github.com/animikhaich/Zero-Code-TF-Classifier/issues
-[license-shield]: https://img.shields.io/github/license/animikhaich/Semantic-Segmentation-using-AutoEncoders.svg?style=flat-square
+[license-shield]: https://img.shields.io/github/license/animikhaich/Zero-Code-TF-Classifier.svg?style=flat-square
 [license-url]: https://github.com/animikhaich/Zero-Code-TF-Classifier/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/animikh-aich/

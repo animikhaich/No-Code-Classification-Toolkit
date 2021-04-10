@@ -13,8 +13,6 @@ os.environ["TF_FORCE_GPU_ALLOW_GROWTH"] = "true"
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
 import tensorflow as tf
 import streamlit as st
-import numpy as np
-import pandas as pd
 import plotly.graph_objs as go
 
 
@@ -116,7 +114,7 @@ class CustomCallback(tf.keras.callbacks.Callback):
             logs (dict, optional): Training Metrics. Defaults to None.
         """
         self.status_text.info(
-            "Training Started! Live Graphs will be shown on the completion of the First Epoch."
+            "Training Started! Live Graphs will be shown on the completion of Each Epoch."
         )
 
     def on_train_end(self, logs=None):

@@ -4,9 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [Version 0.1.0] - 2021-04-10
 
 ### Modified
+- Updated License from MIT to GNU AGPL V3
 - Re-shuffling:
   - `utils/data_loader.py` -> `core/data_loader.py`
   - `utils/model.py` -> `core/model.py`
@@ -91,3 +92,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 [Version 0.1.0 Beta]: https://github.com/animikhaich/Zero-Code-TF-Classifier/releases/tag/v0.1-beta
+[Version 0.1.0]: https://github.com/animikhaich/Zero-Code-TF-Classifier/releases/tag/v0.1
