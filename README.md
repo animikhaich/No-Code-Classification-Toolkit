@@ -138,7 +138,7 @@ The above is just used for development and by no means is necessary to run this 
 ```
 
 4. There are two methods:
-   - Pull the Image from [Docker Hub Repository](https://hub.docker.com/repository/docker/animikhaich/zero-code-tf-classifier)
+   - Pull the Image from [Docker Hub Repository](https://hub.docker.com/r/animikhaich/zero-code-tf-classifier)
    - Clone the Repo and Build the Docker Image using the [build script](build.sh)
 5. Once the Docker Image is Built/Pulled, run the image using the following command:
 
