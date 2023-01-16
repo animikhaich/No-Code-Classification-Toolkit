@@ -53,11 +53,7 @@
 
 ## About The Project
 
-Don't know How to Write Complex Python Programs? Feeling Too Lazy to code a complete Deep Learning Training Pipeline Again? Need to Quickly Prototype an Image Classification Model?
-
-Okay, Let's get to the main part. This is a **Containerized Deep Learning-based Image Classifier Training Tool** that allows anybody with some basic understanding of Hyperparameter Tuning to start training an Image Classification Model.
-
-For the Developer/Contributor: The code is easy to maintain and work with. No Added Complexity. Anyone can download and build a Docker Image to get it up and running with the build script.
+Containerized Tensorflow-based image classification training utility with Streamlit-based interface designed to choose between common architectures and optimizers for quick hyperparameter tuning, which drastically lowers experimentation time.
 
 ## Demo
 
