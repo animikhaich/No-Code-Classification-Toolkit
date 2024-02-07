@@ -19,9 +19,9 @@
     ·
     <a href="https://hub.docker.com/repository/docker/animikhaich/zero-code-tf-classifier">Docker Image</a>
     ·
-    <a href="https://github.com/animikhaich/No-Code-TF-Classifier/issues/new">Report Bug</a>
+    <a href="https://github.com/animikhaich/No-Code-Classification-Toolkit/issues/new">Report Bug</a>
     ·
-    <a href="https://github.com/animikhaich/No-Code-TF-Classifier/issues/new">Request Feature</a>
+    <a href="https://github.com/animikhaich/No-Code-Classification-Toolkit/issues/new">Request Feature</a>
   </p>
 </p>
 <p align="center">
@@ -154,7 +154,7 @@ See the [Changelog](CHANGELOG.md).
 
 ## Roadmap
 
-See the [Open Issues](https://github.com/animikhaich/No-Code-TF-Classifier/issues?q=is%3Aopen) for a list of proposed features (and known issues).
+See the [Open Issues](https://github.com/animikhaich/No-Code-Classification-Toolkit/issues?q=is%3Aopen) for a list of proposed features (and known issues).
 
 See the [Changelog](CHANGELOG.md) a lost of changes currently in development.
 
@@ -185,15 +185,15 @@ Distributed under the [GNU AGPL V3 License](https://choosealicense.com/licenses/
 - Twitter: [@AichAnimikh](https://twitter.com/AichAnimikh)
 
 
-[contributors-shield]: https://img.shields.io/github/contributors/animikhaich/No-Code-TF-Classifier.svg?style=flat-square
-[contributors-url]: https://github.com/animikhaich/No-Code-TF-Classifier/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/animikhaich/No-Code-TF-Classifier.svg?style=flat-square
-[forks-url]: https://github.com/animikhaich/No-Code-TF-Classifier/network/members
-[stars-shield]: https://img.shields.io/github/stars/animikhaich/No-Code-TF-Classifier.svg?style=flat-square
-[stars-url]: https://github.com/animikhaich/No-Code-TF-Classifier/stargazers
-[issues-shield]: https://img.shields.io/github/issues/animikhaich/No-Code-TF-Classifier.svg?style=flat-square
-[issues-url]: https://github.com/animikhaich/No-Code-TF-Classifier/issues
-[license-shield]: https://img.shields.io/github/license/animikhaich/No-Code-TF-Classifier.svg?style=flat-square
-[license-url]: https://github.com/animikhaich/No-Code-TF-Classifier/blob/main/LICENSE
+[contributors-shield]: https://img.shields.io/github/contributors/animikhaich/No-Code-Classification-Toolkit.svg?style=flat-square
+[contributors-url]: https://github.com/animikhaich/No-Code-Classification-Toolkit/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/animikhaich/No-Code-Classification-Toolkit.svg?style=flat-square
+[forks-url]: https://github.com/animikhaich/No-Code-Classification-Toolkit/network/members
+[stars-shield]: https://img.shields.io/github/stars/animikhaich/No-Code-Classification-Toolkit.svg?style=flat-square
+[stars-url]: https://github.com/animikhaich/No-Code-Classification-Toolkit/stargazers
+[issues-shield]: https://img.shields.io/github/issues/animikhaich/No-Code-Classification-Toolkit.svg?style=flat-square
+[issues-url]: https://github.com/animikhaich/No-Code-Classification-Toolkit/issues
+[license-shield]: https://img.shields.io/github/license/animikhaich/No-Code-Classification-Toolkit.svg?style=flat-square
+[license-url]: https://github.com/animikhaich/No-Code-Classification-Toolkit/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/animikh-aich/
