@@ -10,18 +10,18 @@
 <p align="center">
     <img src="assets/deep-learning.png" alt="Logo" width="150" height="150">
 
-  <h2 align="center">Zero Code TF Image Classification Trainer</h2>
+  <h2 align="center">No Code TF Image Classification Trainer</h2>
 
   <p align="center">
-    Start Training a State of the Art Image Classifier within Minutes with Zero Coding Knowledge
+    Start Training a State of the Art Image Classifier within Minutes with No Coding Knowledge
     <br />
     <a href="https://youtu.be/gbuweKMOucc">Demo Video</a>
     ·
     <a href="https://hub.docker.com/repository/docker/animikhaich/zero-code-tf-classifier">Docker Image</a>
     ·
-    <a href="https://github.com/animikhaich/Zero-Code-TF-Classifier/issues/new">Report Bug</a>
+    <a href="https://github.com/animikhaich/No-Code-TF-Classifier/issues/new">Report Bug</a>
     ·
-    <a href="https://github.com/animikhaich/Zero-Code-TF-Classifier/issues/new">Request Feature</a>
+    <a href="https://github.com/animikhaich/No-Code-TF-Classifier/issues/new">Request Feature</a>
   </p>
 </p>
 <p align="center">
@@ -61,7 +61,7 @@ YouTube Video Link: https://youtu.be/gbuweKMOucc
 
 ## Features
 
-- **Zero Coding Required** - I have said this enough, I will repeat one last time: No need to touch any programming language, just a few clicks and start training!
+- **No Coding Required** - I have said this enough, I will repeat one last time: No need to touch any programming language, just a few clicks and start training!
 - **Easy to use UI Interface** - Built with Streamlit, it is a very user friendly, straight forward UI that anybody can use with ease. Just a few selects and a few sliders, and start training. Simple!
 - **Live and Interactive Plots** - Want to know how your training is progressing? Easy! Visualize and compare the results live, on your dashboard and watch the exponentially decaying loss curve build up from scratch!
 
@@ -154,7 +154,7 @@ See the [Changelog](CHANGELOG.md).
 
 ## Roadmap
 
-See the [Open Issues](https://github.com/animikhaich/Zero-Code-TF-Classifier/issues?q=is%3Aopen) for a list of proposed features (and known issues).
+See the [Open Issues](https://github.com/animikhaich/No-Code-TF-Classifier/issues?q=is%3Aopen) for a list of proposed features (and known issues).
 
 See the [Changelog](CHANGELOG.md) a lost of changes currently in development.
 
@@ -185,15 +185,15 @@ Distributed under the [GNU AGPL V3 License](https://choosealicense.com/licenses/
 - Twitter: [@AichAnimikh](https://twitter.com/AichAnimikh)
 
 
-[contributors-shield]: https://img.shields.io/github/contributors/animikhaich/Zero-Code-TF-Classifier.svg?style=flat-square
-[contributors-url]: https://github.com/animikhaich/Zero-Code-TF-Classifier/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/animikhaich/Zero-Code-TF-Classifier.svg?style=flat-square
-[forks-url]: https://github.com/animikhaich/Zero-Code-TF-Classifier/network/members
-[stars-shield]: https://img.shields.io/github/stars/animikhaich/Zero-Code-TF-Classifier.svg?style=flat-square
-[stars-url]: https://github.com/animikhaich/Zero-Code-TF-Classifier/stargazers
-[issues-shield]: https://img.shields.io/github/issues/animikhaich/Zero-Code-TF-Classifier.svg?style=flat-square
-[issues-url]: https://github.com/animikhaich/Zero-Code-TF-Classifier/issues
-[license-shield]: https://img.shields.io/github/license/animikhaich/Zero-Code-TF-Classifier.svg?style=flat-square
-[license-url]: https://github.com/animikhaich/Zero-Code-TF-Classifier/blob/main/LICENSE
+[contributors-shield]: https://img.shields.io/github/contributors/animikhaich/No-Code-TF-Classifier.svg?style=flat-square
+[contributors-url]: https://github.com/animikhaich/No-Code-TF-Classifier/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/animikhaich/No-Code-TF-Classifier.svg?style=flat-square
+[forks-url]: https://github.com/animikhaich/No-Code-TF-Classifier/network/members
+[stars-shield]: https://img.shields.io/github/stars/animikhaich/No-Code-TF-Classifier.svg?style=flat-square
+[stars-url]: https://github.com/animikhaich/No-Code-TF-Classifier/stargazers
+[issues-shield]: https://img.shields.io/github/issues/animikhaich/No-Code-TF-Classifier.svg?style=flat-square
+[issues-url]: https://github.com/animikhaich/No-Code-TF-Classifier/issues
+[license-shield]: https://img.shields.io/github/license/animikhaich/No-Code-TF-Classifier.svg?style=flat-square
+[license-url]: https://github.com/animikhaich/No-Code-TF-Classifier/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/animikh-aich/
