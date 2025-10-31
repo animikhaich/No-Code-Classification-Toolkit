@@ -137,13 +137,22 @@ The above is just used for development and by no means is necessary to run this 
         └── *.jpg
 ```
 
-4. There are two methods:
+4. There are three methods to get the Docker image:
+   - Pull the Image from [GitHub Container Registry](https://github.com/animikhaich/No-Code-Classification-Toolkit/pkgs/container/no-code-classification-toolkit):
+     ```sh
+     docker pull ghcr.io/animikhaich/no-code-classification-toolkit:latest
+     ```
    - Pull the Image from [Docker Hub Repository](https://hub.docker.com/repository/docker/animikhaich/zero-code-tf-classifier)
    - Clone the Repo and Build the Docker Image using the [build script](build.sh)
 5. Once the Docker Image is Built/Pulled, run the image using the following command:
 
 ```sh
-docker run -it --runtime nvidia --net host -v /path/to/dataset:/data <image-name>
+docker run -it --runtime nvidia --net host -v /path/to/dataset:/data ghcr.io/animikhaich/no-code-classification-toolkit:latest
+```
+
+Or if using Docker Hub image:
+```sh
+docker run -it --runtime nvidia --net host -v /path/to/dataset:/data animikhaich/zero-code-tf-classifier
 ```
 
 6. After training the trained weights can be found at: `/app/model/weights` Inside the Container
