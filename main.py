@@ -19,8 +19,8 @@ import tensorflow as tf
 import streamlit as st
 
 # TODO: Add Support For Live Training Graphs (on_train_batch_end) without slowing down the Training Process
-# TODO: Add Supoort For EfficientNet - Fix Data Loader Input to be Un-Normalized Images
-# TODO: Add Supoort For Experiment and Logs Tracking and Comparison to Past Experiments
+# TODO: Add Support For EfficientNet - Fix Data Loader Input to be Un-Normalized Images
+# TODO: Add Support For Experiment and Logs Tracking and Comparison to Past Experiments
 # TODO: Add Support For Dataset Visualization
 # TODO: Add Support for Augmented Batch Visualization
 # TODO: Add Support for Augmentation Hyperparameter Customization (More Granular Control)
@@ -28,7 +28,18 @@ import streamlit as st
 
 # Constant Values that are Pre-defined for the dashboard to function
 def get_optimizer(name, learning_rate):
-    """Get optimizer instance with specified learning rate"""
+    """Get optimizer instance with specified learning rate
+    
+    Args:
+        name: Name of the optimizer (must be one of the supported optimizers)
+        learning_rate: Learning rate for the optimizer
+        
+    Returns:
+        Configured optimizer instance
+        
+    Raises:
+        ValueError: If optimizer name is not supported
+    """
     optimizers_map = {
         "SGD": tf.keras.optimizers.SGD,
         "RMSprop": tf.keras.optimizers.RMSprop,
@@ -39,11 +50,11 @@ def get_optimizer(name, learning_rate):
         "Nadam": tf.keras.optimizers.Nadam,
         "FTRL": tf.keras.optimizers.Ftrl,
     }
+    if name not in optimizers_map:
+        raise ValueError(f"Unsupported optimizer: {name}. Must be one of {list(optimizers_map.keys())}")
     return optimizers_map[name](learning_rate=learning_rate)
 
-OPTIMIZERS = list({
-    "SGD", "RMSprop", "Adam", "Adadelta", "Adagrad", "Adamax", "Nadam", "FTRL"
-})
+OPTIMIZERS = ["SGD", "RMSprop", "Adam", "Adadelta", "Adagrad", "Adamax", "Nadam", "FTRL"]
 
 TRAINING_PRECISION = {
     "Full Precision (FP32)": "float32",
