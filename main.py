@@ -27,16 +27,23 @@ import streamlit as st
 
 
 # Constant Values that are Pre-defined for the dashboard to function
-OPTIMIZERS = {
-    "SGD": tf.keras.optimizers.SGD(),
-    "RMSprop": tf.keras.optimizers.RMSprop(),
-    "Adam": tf.keras.optimizers.Adam(),
-    "Adadelta": tf.keras.optimizers.Adadelta(),
-    "Adagrad": tf.keras.optimizers.Adagrad(),
-    "Adamax": tf.keras.optimizers.Adamax(),
-    "Nadam": tf.keras.optimizers.Nadam(),
-    "FTRL": tf.keras.optimizers.Ftrl(),
-}
+def get_optimizer(name, learning_rate):
+    """Get optimizer instance with specified learning rate"""
+    optimizers_map = {
+        "SGD": tf.keras.optimizers.SGD,
+        "RMSprop": tf.keras.optimizers.RMSprop,
+        "Adam": tf.keras.optimizers.Adam,
+        "Adadelta": tf.keras.optimizers.Adadelta,
+        "Adagrad": tf.keras.optimizers.Adagrad,
+        "Adamax": tf.keras.optimizers.Adamax,
+        "Nadam": tf.keras.optimizers.Nadam,
+        "FTRL": tf.keras.optimizers.Ftrl,
+    }
+    return optimizers_map[name](learning_rate=learning_rate)
+
+OPTIMIZERS = list({
+    "SGD", "RMSprop", "Adam", "Adadelta", "Adagrad", "Adamax", "Nadam", "FTRL"
+})
 
 TRAINING_PRECISION = {
     "Full Precision (FP32)": "float32",
@@ -117,7 +124,7 @@ with st.sidebar:
     selected_backbone = st.selectbox("Select Backbone", BACKBONES)
 
     # Select Optimizer
-    selected_optimizer = st.selectbox("Training Optimizer", list(OPTIMIZERS.keys()))
+    selected_optimizer = st.selectbox("Training Optimizer", OPTIMIZERS)
 
     # Select Learning Rate
     selected_learning_rate = st.select_slider("Learning Rate", LEARNING_RATES, 0.001)
@@ -168,15 +175,15 @@ if start_training:
         batch_size=selected_batch_size, augment=False
     )
 
-    # Set the Learning Rate for the Selected Optimizer
-    OPTIMIZERS[selected_optimizer].learning_rate.assign(selected_learning_rate)
+    # Create optimizer with the selected learning rate
+    optimizer = get_optimizer(selected_optimizer, selected_learning_rate)
 
     # Init the Classification Trainier
     classifier = ImageClassifier(
         backbone=selected_backbone,
         input_shape=input_shape,
         classes=train_data_loader.get_num_classes(),
-        optimizer=OPTIMIZERS[selected_optimizer],
+        optimizer=optimizer,
     )
 
     # Set the Callbacks to include the custom callback (to stream progress to dashboard)

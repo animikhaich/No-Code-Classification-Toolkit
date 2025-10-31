@@ -66,7 +66,7 @@ class ImageClassificationDataLoader:
 
         self.BATCH_SIZE = None
         self.LABELS = []
-        self.AUTOTUNE = tf.data.experimental.AUTOTUNE
+        self.AUTOTUNE = tf.data.AUTOTUNE
 
         self.DATA_DIR = data_dir
         self.WIDTH, self.HEIGHT = image_dims
@@ -344,7 +344,7 @@ class ImageClassificationDataLoader:
         dataset = self.dataset_files.map(
             self.load_image, num_parallel_calls=self.AUTOTUNE
         )
-        dataset = dataset.apply(tf.data.experimental.ignore_errors())
+        dataset = dataset.apply(tf.data.Dataset.ignore_errors())
 
         dataset = dataset.repeat()
 
