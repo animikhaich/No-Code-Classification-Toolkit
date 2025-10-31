@@ -344,7 +344,7 @@ class ImageClassificationDataLoader:
         dataset = self.dataset_files.map(
             self.load_image, num_parallel_calls=self.AUTOTUNE
         )
-        dataset = dataset.apply(tf.data.Dataset.ignore_errors())
+        dataset = dataset.ignore_errors()
 
         dataset = dataset.repeat()
 
