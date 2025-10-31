@@ -10,10 +10,10 @@
 <p align="center">
     <img src="assets/deep-learning.png" alt="Logo" width="150" height="150">
 
-  <h2 align="center">Zero Code TF Image Classification Trainer</h2>
+  <h2 align="center">Zero Code Multi-Framework Image Classification Trainer</h2>
 
   <p align="center">
-    Start Training a State of the Art Image Classifier within Minutes with Zero Coding Knowledge
+    Start Training a State of the Art Image Classifier within Minutes with Zero Coding Knowledge - Now with TensorFlow and PyTorch Support!
     <br />
     <a href="https://youtu.be/gbuweKMOucc">Demo Video</a>
     ·
@@ -68,6 +68,17 @@ YouTube Video Link: https://youtu.be/gbuweKMOucc
 - **Zero Coding Required** - I have said this enough, I will repeat one last time: No need to touch any programming language, just a few clicks and start training!
 - **Easy to use UI Interface** - Built with Streamlit, it is a very user friendly, straight forward UI that anybody can use with ease. Just a few selects and a few sliders, and start training. Simple!
 - **Live and Interactive Plots** - Want to know how your training is progressing? Easy! Visualize and compare the results live, on your dashboard and watch the exponentially decaying loss curve build up from scratch!
+- **Multi-Framework Support** - Now supports both **TensorFlow** and **PyTorch**! Choose the framework that works best for you.
+- **Multiple Docker Images** - Three optimized Docker images available:
+  - **TensorFlow-only**: Lightweight image with only TensorFlow
+  - **PyTorch-only**: Lightweight image with only PyTorch
+  - **Both Frameworks**: Complete image with both TensorFlow and PyTorch
+- **Best Practices** - Implements best practices for both frameworks including:
+  - Mixed Precision Training (AMP for PyTorch, mixed_float16/bfloat16 for TensorFlow)
+  - Learning Rate Scheduling
+  - Early Stopping
+  - Model Checkpointing
+  - TensorBoard Logging
 
 If you want to go in-depth with the Technical Details, then there are too many to list here. I would invite you to check out the [Changelog](CHANGELOG.md) where every feature is mentioned in details.  
 
@@ -107,7 +118,8 @@ The above is just used for development and by no means is necessary to run this 
 ### Built With
 
 - [Streamlit](https://streamlit.io/)
-- [Tensorflow](https://www.tensorflow.org/)
+- [TensorFlow](https://www.tensorflow.org/)
+- [PyTorch](https://pytorch.org/)
 
 ## Setup and Usage
 
@@ -137,14 +149,55 @@ The above is just used for development and by no means is necessary to run this 
         └── *.jpg
 ```
 
-4. There are two methods:
-   - Pull the Image from [Docker Hub Repository](https://hub.docker.com/repository/docker/animikhaich/zero-code-tf-classifier)
-   - Clone the Repo and Build the Docker Image using the [build script](build.sh)
-5. Once the Docker Image is Built/Pulled, run the image using the following command:
+4. **Choose your Docker image** based on your needs:
 
-```sh
-docker run -it --runtime nvidia --net host -v /path/to/dataset:/data <image-name>
-```
+   **Option A: Pull from Docker Hub (when available)**
+   ```sh
+   # For TensorFlow only
+   docker pull animikhaich/zero-code-classifier:tensorflow
+   
+   # For PyTorch only
+   docker pull animikhaich/zero-code-classifier:pytorch
+   
+   # For both frameworks
+   docker pull animikhaich/zero-code-classifier:both
+   ```
+
+   **Option B: Build locally**
+   ```sh
+   # Clone the repository
+   git clone https://github.com/animikhaich/No-Code-Classification-Toolkit.git
+   cd No-Code-Classification-Toolkit
+   
+   # Build all images
+   bash build-all.sh
+   
+   # Or build individual images:
+   # TensorFlow only
+   docker build -f Dockerfile.tensorflow -t animikhaich/zero-code-classifier:tensorflow .
+   
+   # PyTorch only
+   docker build -f Dockerfile.pytorch -t animikhaich/zero-code-classifier:pytorch .
+   
+   # Both frameworks
+   docker build -f Dockerfile.both -t animikhaich/zero-code-classifier:both .
+   ```
+
+5. **Run the Docker container:**
+
+   ```sh
+   # For TensorFlow
+   docker run -it --gpus all --net host -v /path/to/dataset:/data animikhaich/zero-code-classifier:tensorflow
+   
+   # For PyTorch
+   docker run -it --gpus all --net host -v /path/to/dataset:/data animikhaich/zero-code-classifier:pytorch
+   
+   # For both frameworks
+   docker run -it --gpus all --net host -v /path/to/dataset:/data animikhaich/zero-code-classifier:both
+   ```
+   
+   **Note:** Use `--gpus all` for newer Docker versions, or `--runtime nvidia` for older versions with nvidia-docker.
+
 
 6. After training the trained weights can be found at: `/app/model/weights` Inside the Container
 7. After training the Tensorboard Logs can be found at: `/app/logs/tensorboard` Inside the Container
