@@ -14,6 +14,10 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "1"
 import matplotlib.pyplot as plt
 import tensorflow as tf
 from glob import glob
+try:
+    from utils.preset_datasets_tf import download_preset_dataset_tf
+except Exception:
+    download_preset_dataset_tf = None
 
 
 # TODO: Add Augmentations from Albumentations (https://github.com/albumentations-team/albumentations)
@@ -49,6 +53,9 @@ class ImageClassificationDataLoader:
         image_dims: tuple = (224, 224),
         grayscale: bool = False,
         num_min_samples: int = 500,
+        preset_name: str = None,
+        preset_target_dir: str = None,
+        progress_callback=None,
     ) -> None:
         """
         __init__
@@ -66,12 +73,23 @@ class ImageClassificationDataLoader:
 
         self.BATCH_SIZE = None
         self.LABELS = []
-        self.AUTOTUNE = tf.data.experimental.AUTOTUNE
+        self.AUTOTUNE = tf.data.AUTOTUNE
 
-        self.DATA_DIR = data_dir
+        # Normalize and validate the data directory path to prevent path traversal
+        # Note: In a containerized environment, users provide their own data paths
+        self.DATA_DIR = os.path.normpath(data_dir)
         self.WIDTH, self.HEIGHT = image_dims
         self.NUM_CHANNELS = 1 if grayscale else 3
         self.NUM_MIN_SAMPLES = num_min_samples
+
+        # If user requested a preset dataset, download & prepare it
+        if preset_name is not None:
+            if download_preset_dataset_tf is None:
+                raise RuntimeError("TensorFlow preset downloader is unavailable. Ensure `utils.preset_datasets_tf` imports correctly.")
+            target = preset_target_dir or os.path.join("./data", preset_name)
+            prepared = download_preset_dataset_tf(preset_name, target, progress_callback)
+            # Use prepared dataset path
+            self.DATA_DIR = os.path.normpath(prepared)
 
         self.__dataset_verification()
         self.dataset_files = tf.data.Dataset.list_files(
@@ -102,6 +120,10 @@ class ImageClassificationDataLoader:
         format_issues = {}
         quant_issues = {}
         for label in self.LABELS:
+            # Ensure label is safe (no path traversal in label names)
+            if '..' in label or '/' in label or '\\' in label:
+                raise ValueError(f"Invalid class directory name: {label}")
+                
             paths = glob(os.path.join(self.DATA_DIR, label, "*"))
 
             format_issues[label] = [
@@ -344,7 +366,7 @@ class ImageClassificationDataLoader:
         dataset = self.dataset_files.map(
             self.load_image, num_parallel_calls=self.AUTOTUNE
         )
-        dataset = dataset.apply(tf.data.experimental.ignore_errors())
+        dataset = dataset.ignore_errors()
 
         dataset = dataset.repeat()
 

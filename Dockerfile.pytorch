@@ -1,0 +1,15 @@
+FROM astral/uv:python3.12-bookworm-slim
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update
+RUN apt-get install -y parallel
+
+RUN mkdir /app
+WORKDIR /app
+COPY ./requirements-pytorch.txt /app
+
+RUN uv pip install -r requirements-pytorch.txt --system
+COPY . /app
+
+CMD ["sh", "launch.sh"]

@@ -1,0 +1,9 @@
+streamlit==1.39.0
+plotly==5.24.1
+matplotlib==3.9.2
+pandas==2.2.3
+torch==2.9.0
+torchvision==0.24.0
+tqdm==4.66.5
+pillow==10.2.0
+tensorboard==2.20.0

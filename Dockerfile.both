@@ -1,0 +1,23 @@
+FROM astral/uv:python3.12-bookworm-slim
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Install Python and necessary tools
+RUN apt-get update && apt-get install -y \
+    parallel \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app directory
+RUN mkdir /app
+WORKDIR /app
+
+# Copy requirements and install dependencies
+COPY ./requirements-tensorflow.txt /app
+COPY ./requirements-pytorch.txt /app
+RUN uv pip install --no-cache-dir -r requirements-tensorflow.txt --system
+RUN uv pip install --no-cache-dir -r requirements-pytorch.txt --system
+
+# Copy application files
+COPY . /app
+
+CMD ["sh", "launch.sh"]
