@@ -42,6 +42,7 @@
   - [Prerequisites](#prerequisites)
   - [Built With](#built-with)
 - [Setup and Usage](#setup-and-usage)
+- [Framework Guide](#framework-guide)
 - [Changelog](#changelog)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
@@ -202,6 +203,11 @@ The above is just used for development and by no means is necessary to run this 
 6. After training the trained weights can be found at: `/app/model/weights` Inside the Container
 7. After training the Tensorboard Logs can be found at: `/app/logs/tensorboard` Inside the Container
 8. You can use `docker cp <container-name/id>:<path-inside-container> <path-on-host-machine>` to get the weights and logs out. Further details can be found here: [Docker cp Docs](https://docs.docker.com/engine/reference/commandline/cp/)
+
+
+## Framework Guide
+
+For detailed information about choosing between TensorFlow and PyTorch, available models, optimizers, and best practices, see the [Framework Guide](FRAMEWORK_GUIDE.md).
 
 
 ## Changelog
