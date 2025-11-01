@@ -14,10 +14,11 @@ RUN mkdir /app
 WORKDIR /app
 
 # Copy requirements and install dependencies
+RUN pip install uv
 COPY ./requirements-both.txt /app
-RUN pip install --no-cache-dir -r requirements-both.txt
+RUN uv pip install --no-cache-dir -r requirements-both.txt --system
 
 # Copy application files
 COPY . /app
 
-CMD sh launch.sh
+CMD ["sh", "launch.sh"]

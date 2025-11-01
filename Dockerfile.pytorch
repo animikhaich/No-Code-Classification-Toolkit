@@ -9,7 +9,8 @@ RUN mkdir /app
 WORKDIR /app
 COPY ./requirements-pytorch.txt /app
 
-RUN pip install -r requirements-pytorch.txt
+RUN pip install uv
+RUN uv pip install -r requirements-pytorch.txt --system
 COPY . /app
 
-CMD sh launch.sh
+CMD ["sh", "launch.sh"]
