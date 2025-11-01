@@ -86,7 +86,9 @@ class ImageClassifierPyTorch:
         # Default Initializations
         self.timestamp = datetime.now().strftime("%d-%m-%Y_%H-%M-%S")
         self.weights_path = f"model/weights/pytorch/{backbone}_{self.timestamp}.pth"
-        self.best_weights_path = f"model/weights/pytorch/{backbone}_{self.timestamp}_best.pth"
+        self.best_weights_path = (
+            f"model/weights/pytorch/{backbone}_{self.timestamp}_best.pth"
+        )
         self.tensorboard_logs_path = f"logs/tensorboard/{backbone}_{self.timestamp}"
         self.writer = None
 
@@ -175,32 +177,27 @@ class ImageClassifierPyTorch:
         if "resnet" in self.backbone.lower():
             num_features = base_model.fc.in_features
             base_model.fc = nn.Sequential(
-                nn.Dropout(0.5),
-                nn.Linear(num_features, self.classes)
+                nn.Dropout(0.5), nn.Linear(num_features, self.classes)
             )
         elif "vgg" in self.backbone.lower():
             num_features = base_model.classifier[6].in_features
             base_model.classifier[6] = nn.Sequential(
-                nn.Dropout(0.5),
-                nn.Linear(num_features, self.classes)
+                nn.Dropout(0.5), nn.Linear(num_features, self.classes)
             )
         elif "densenet" in self.backbone.lower():
             num_features = base_model.classifier.in_features
             base_model.classifier = nn.Sequential(
-                nn.Dropout(0.5),
-                nn.Linear(num_features, self.classes)
+                nn.Dropout(0.5), nn.Linear(num_features, self.classes)
             )
         elif "mobilenet" in self.backbone.lower():
             num_features = base_model.classifier[-1].in_features
             base_model.classifier[-1] = nn.Sequential(
-                nn.Dropout(0.5),
-                nn.Linear(num_features, self.classes)
+                nn.Dropout(0.5), nn.Linear(num_features, self.classes)
             )
         elif "efficientnet" in self.backbone.lower():
             num_features = base_model.classifier[-1].in_features
             base_model.classifier[-1] = nn.Sequential(
-                nn.Dropout(0.5),
-                nn.Linear(num_features, self.classes)
+                nn.Dropout(0.5), nn.Linear(num_features, self.classes)
             )
         else:
             raise ValueError(f"Unsupported backbone architecture: {self.backbone}")
@@ -245,11 +242,10 @@ class ImageClassifierPyTorch:
         """
         self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
             self.optimizer_obj,
-            mode='max',
+            mode="max",
             factor=0.2,
             patience=2,
-            verbose=True,
-            min_lr=1e-8
+            min_lr=1e-8,
         )
         return self.scheduler
 
@@ -277,7 +273,7 @@ class ImageClassifierPyTorch:
         """
         self.use_mixed_precision = enabled
         if enabled:
-            self.scaler = torch.cuda.amp.GradScaler()
+            self.scaler = torch.amp.GradScaler('cuda')
 
     def save_checkpoint(self, path, is_best=False):
         """
@@ -291,12 +287,12 @@ class ImageClassifierPyTorch:
         """
         self.__create_directory(os.path.dirname(path))
         checkpoint = {
-            'model_state_dict': self.model.state_dict(),
-            'optimizer_state_dict': self.optimizer_obj.state_dict(),
-            'best_val_acc': self.best_val_acc,
-            'backbone': self.backbone,
-            'classes': self.classes,
-            'timestamp': self.timestamp,
+            "model_state_dict": self.model.state_dict(),
+            "optimizer_state_dict": self.optimizer_obj.state_dict(),
+            "best_val_acc": self.best_val_acc,
+            "backbone": self.backbone,
+            "classes": self.classes,
+            "timestamp": self.timestamp,
         }
         torch.save(checkpoint, path)
 
@@ -316,13 +312,13 @@ class ImageClassifierPyTorch:
             dict: Checkpoint dictionary
         """
         checkpoint = torch.load(path, map_location=self.device)
-        self.model.load_state_dict(checkpoint['model_state_dict'])
+        self.model.load_state_dict(checkpoint["model_state_dict"])
         if self.optimizer_obj is not None:
-            self.optimizer_obj.load_state_dict(checkpoint['optimizer_state_dict'])
-        self.best_val_acc = checkpoint.get('best_val_acc', 0.0)
+            self.optimizer_obj.load_state_dict(checkpoint["optimizer_state_dict"])
+        self.best_val_acc = checkpoint.get("best_val_acc", 0.0)
         return checkpoint
 
-    def train_epoch(self, train_loader, epoch):
+    def train_epoch(self, train_loader, epoch, streamlit_callback=None):
         """
         train_epoch
 
@@ -341,13 +337,14 @@ class ImageClassifierPyTorch:
         total = 0
 
         pbar = tqdm(train_loader, desc=f"Epoch {epoch+1} [Train]")
+        total_batches = len(train_loader)
         for batch_idx, (inputs, targets) in enumerate(pbar):
             inputs, targets = inputs.to(self.device), targets.to(self.device)
 
             self.optimizer_obj.zero_grad()
 
             if self.use_mixed_precision:
-                with torch.cuda.amp.autocast():
+                with torch.amp.autocast('cuda'):
                     outputs = self.model(inputs)
                     loss = self.loss_fn(outputs, targets)
 
@@ -364,17 +361,30 @@ class ImageClassifierPyTorch:
             _, predicted = outputs.max(1)
             total += targets.size(0)
             correct += predicted.eq(targets).sum().item()
+            batch_loss = running_loss / (batch_idx + 1)
+            batch_acc = 100.0 * correct / total
+            pbar.set_postfix({"loss": batch_loss, "acc": batch_acc})
 
-            pbar.set_postfix({
-                'loss': running_loss / (batch_idx + 1),
-                'acc': 100. * correct / total
-            })
+            # Update Streamlit per-batch progress if callback provided
+            if streamlit_callback is not None and hasattr(
+                streamlit_callback, "on_batch_end"
+            ):
+                try:
+                    streamlit_callback.on_batch_end(
+                        batch_idx,
+                        total_batches,
+                        loss=batch_loss,
+                        acc=batch_acc,
+                        phase="train",
+                    )
+                except Exception:
+                    pass
 
         epoch_loss = running_loss / len(train_loader)
-        epoch_acc = 100. * correct / total
+        epoch_acc = 100.0 * correct / total
         return epoch_loss, epoch_acc
 
-    def validate_epoch(self, val_loader, epoch):
+    def validate_epoch(self, val_loader, epoch, streamlit_callback=None):
         """
         validate_epoch
 
@@ -394,6 +404,7 @@ class ImageClassifierPyTorch:
 
         with torch.no_grad():
             pbar = tqdm(val_loader, desc=f"Epoch {epoch+1} [Val]")
+            total_batches = len(val_loader)
             for batch_idx, (inputs, targets) in enumerate(pbar):
                 inputs, targets = inputs.to(self.device), targets.to(self.device)
 
@@ -404,14 +415,27 @@ class ImageClassifierPyTorch:
                 _, predicted = outputs.max(1)
                 total += targets.size(0)
                 correct += predicted.eq(targets).sum().item()
+                batch_loss = running_loss / (batch_idx + 1)
+                batch_acc = 100.0 * correct / total
+                pbar.set_postfix({"loss": batch_loss, "acc": batch_acc})
 
-                pbar.set_postfix({
-                    'loss': running_loss / (batch_idx + 1),
-                    'acc': 100. * correct / total
-                })
+                # Update Streamlit per-batch progress if callback provided
+                if streamlit_callback is not None and hasattr(
+                    streamlit_callback, "on_batch_end"
+                ):
+                    try:
+                        streamlit_callback.on_batch_end(
+                            batch_idx,
+                            total_batches,
+                            loss=batch_loss,
+                            acc=batch_acc,
+                            phase="val",
+                        )
+                    except Exception:
+                        pass
 
         epoch_loss = running_loss / len(val_loader)
-        epoch_acc = 100. * correct / total
+        epoch_acc = 100.0 * correct / total
         return epoch_loss, epoch_acc
 
     def train(self, train_loader, val_loader=None, epochs=100, streamlit_callback=None):
@@ -444,10 +468,10 @@ class ImageClassifierPyTorch:
 
         # Training history
         self.history = {
-            'train_loss': [],
-            'train_acc': [],
-            'val_loss': [],
-            'val_acc': [],
+            "train_loss": [],
+            "train_acc": [],
+            "val_loss": [],
+            "val_acc": [],
         }
 
         print(f"Training on device: {self.device}")
@@ -467,19 +491,25 @@ class ImageClassifierPyTorch:
                 streamlit_callback.on_epoch_begin(epoch)
 
             # Train
-            train_loss, train_acc = self.train_epoch(train_loader, epoch)
-            self.history['train_loss'].append(train_loss)
-            self.history['train_acc'].append(train_acc)
+            train_loss, train_acc = self.train_epoch(
+                train_loader, epoch, streamlit_callback=streamlit_callback
+            )
+            self.history["train_loss"].append(train_loss)
+            self.history["train_acc"].append(train_acc)
 
             # Validate
             if val_loader is not None:
-                val_loss, val_acc = self.validate_epoch(val_loader, epoch)
-                self.history['val_loss'].append(val_loss)
-                self.history['val_acc'].append(val_acc)
+                val_loss, val_acc = self.validate_epoch(
+                    val_loader, epoch, streamlit_callback=streamlit_callback
+                )
+                self.history["val_loss"].append(val_loss)
+                self.history["val_acc"].append(val_acc)
 
                 # Call streamlit callback on epoch end
                 if streamlit_callback is not None:
-                    streamlit_callback.on_epoch_end(epoch, train_loss, train_acc, val_loss, val_acc)
+                    streamlit_callback.on_epoch_end(
+                        epoch, train_loss, train_acc, val_loss, val_acc
+                    )
 
                 # Learning rate scheduling
                 self.scheduler.step(val_acc)
@@ -498,11 +528,13 @@ class ImageClassifierPyTorch:
 
                 # TensorBoard logging
                 if self.writer is not None:
-                    self.writer.add_scalar('Loss/train', train_loss, epoch)
-                    self.writer.add_scalar('Loss/val', val_loss, epoch)
-                    self.writer.add_scalar('Accuracy/train', train_acc, epoch)
-                    self.writer.add_scalar('Accuracy/val', val_acc, epoch)
-                    self.writer.add_scalar('Learning_Rate', self.optimizer_obj.param_groups[0]['lr'], epoch)
+                    self.writer.add_scalar("Loss/train", train_loss, epoch)
+                    self.writer.add_scalar("Loss/val", val_loss, epoch)
+                    self.writer.add_scalar("Accuracy/train", train_acc, epoch)
+                    self.writer.add_scalar("Accuracy/val", val_acc, epoch)
+                    self.writer.add_scalar(
+                        "Learning_Rate", self.optimizer_obj.param_groups[0]["lr"], epoch
+                    )
 
                 print(f"\nEpoch {epoch+1}/{epochs}")
                 print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.2f}%")
@@ -511,13 +543,17 @@ class ImageClassifierPyTorch:
             else:
                 # Call streamlit callback on epoch end (train only)
                 if streamlit_callback is not None:
-                    streamlit_callback.on_epoch_end(epoch, train_loss, train_acc, None, None)
+                    streamlit_callback.on_epoch_end(
+                        epoch, train_loss, train_acc, None, None
+                    )
 
                 # TensorBoard logging (train only)
                 if self.writer is not None:
-                    self.writer.add_scalar('Loss/train', train_loss, epoch)
-                    self.writer.add_scalar('Accuracy/train', train_acc, epoch)
-                    self.writer.add_scalar('Learning_Rate', self.optimizer_obj.param_groups[0]['lr'], epoch)
+                    self.writer.add_scalar("Loss/train", train_loss, epoch)
+                    self.writer.add_scalar("Accuracy/train", train_acc, epoch)
+                    self.writer.add_scalar(
+                        "Learning_Rate", self.optimizer_obj.param_groups[0]["lr"], epoch
+                    )
 
                 print(f"\nEpoch {epoch+1}/{epochs}")
                 print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.2f}%")

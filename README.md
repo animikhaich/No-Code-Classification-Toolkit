@@ -150,6 +150,46 @@ The above is just used for development and by no means is necessary to run this 
         └── *.jpg
 ```
 
+### Using Preset Datasets (quick start)
+
+If you don't have your own dataset ready, the toolkit supports downloading common image classification datasets (CIFAR10, CIFAR100, MNIST, FashionMNIST, STL10) and preparing them in the required folder-per-class layout.
+
+Example (Streamlit UI progress integration):
+
+```python
+import streamlit as st
+from core.data_loader_pytorch import ImageClassificationDataLoaderPyTorch
+from utils.add_ons_pytorch import make_streamlit_progress_callback
+
+st.title('Preset Dataset Download')
+cb = make_streamlit_progress_callback(prefix='Downloading dataset')
+# This will download CIFAR10 into ./data/CIFAR10 (if not present) and show progress in Streamlit
+dl = ImageClassificationDataLoaderPyTorch(
+  data_dir='./data/CIFAR10',
+  image_dims=(224,224),
+  preset_name='CIFAR10',
+  preset_target_dir='./data/CIFAR10',
+  progress_callback=cb,
+)
+
+st.write('Dataset ready at:', dl.data_dir)
+```
+
+Or use from Python (no Streamlit callback):
+
+```python
+from core.data_loader_pytorch import ImageClassificationDataLoaderPyTorch
+
+# download into ./data/MNIST and prepare folder layout automatically
+dl = ImageClassificationDataLoaderPyTorch(
+  data_dir='./data/MNIST',
+  preset_name='MNIST',
+  preset_target_dir='./data/MNIST',
+)
+
+dataloader, dataset = dl.create_dataloader(batch_size=32, augment=False)
+```
+
 4. **Choose your Docker image** based on your needs:
 
    **Option A: Pull from Docker Hub (when available)**

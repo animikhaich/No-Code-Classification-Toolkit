@@ -42,6 +42,10 @@ class CustomCallbackPyTorch:
         self.epoch_progress = st.progress(0)
         self.status_text = st.empty()
 
+        # Per-step progress (within an epoch)
+        self.step_text = st.empty()
+        self.step_progress = st.progress(0)
+
         # Charts
         self.loss_chart = st.empty()
         self.accuracy_chart = st.empty()
@@ -110,6 +114,36 @@ class CustomCallbackPyTorch:
         """
         self.epoch_text.text(f"Epoch: {epoch + 1}/{self.num_epochs}")
         self.epoch_progress.progress((epoch) / self.num_epochs)
+        # reset step progress for the new epoch
+        try:
+            self.step_text.text("")
+            self.step_progress.progress(0)
+        except Exception:
+            pass
+
+    def on_batch_end(self, batch_idx, batch_total, loss=None, acc=None, phase="train"):
+        """
+        Called at the end of each batch during training/validation to update
+        a per-step progress bar and small status text.
+
+        Args:
+            batch_idx (int): Zero-based index of the completed batch
+            batch_total (int): Total number of batches in the epoch
+            loss (float, optional): Current batch loss
+            acc (float, optional): Current batch accuracy (in percent)
+            phase (str): 'train' or 'val'
+        """
+        try:
+            frac = float(batch_idx + 1) / float(batch_total) if batch_total else 0.0
+            self.step_progress.progress(min(1.0, frac))
+            text = f"{phase.title()} batch: {batch_idx + 1}/{batch_total}"
+            if loss is not None:
+                text += f" | loss: {loss:.4f}"
+            if acc is not None:
+                text += f" | acc: {acc:.2f}%"
+            self.step_text.text(text)
+        except Exception:
+            pass
 
     def on_epoch_end(self, epoch, train_loss, train_acc, val_loss=None, val_acc=None):
         """
@@ -160,3 +194,28 @@ class CustomCallbackPyTorch:
 
         # Update progress
         self.epoch_progress.progress((epoch + 1) / self.num_epochs)
+
+
+def make_streamlit_progress_callback(prefix="Downloading"):
+    """
+    Utility to create a Streamlit-friendly progress callback compatible with
+    the data loader preset downloader. Returns a callable(done, total) -> None
+    that updates a Streamlit progress bar and status text.
+
+    Example:
+        cb = make_streamlit_progress_callback()
+        dl = ImageClassificationDataLoaderPyTorch(..., preset_name='CIFAR10', progress_callback=cb)
+    """
+    progress_bar = st.progress(0)
+    status = st.empty()
+
+    def _cb(done, total):
+        try:
+            frac = float(done) / float(total) if total else 0.0
+            progress_bar.progress(min(1.0, frac))
+            status.text(f"{prefix}: {done}/{total}")
+        except Exception:
+            # keep UI robust to callback errors
+            pass
+
+    return _cb

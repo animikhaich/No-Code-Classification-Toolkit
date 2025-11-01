@@ -14,6 +14,12 @@ from torchvision import transforms
 from PIL import Image
 from glob import glob
 import numpy as np
+try:
+    # helper to download preset datasets (writes folder-per-class layout)
+    from utils.preset_datasets_pytorch import download_preset_dataset
+except Exception:
+    # If utils module isn't available on import, define a noop placeholder to allow import
+    download_preset_dataset = None
 
 # TODO: Add Augmentations from Albumentations (https://github.com/albumentations-team/albumentations)
 # TODO: Add Tunable Augmentation Loading from a Config File
@@ -301,6 +307,9 @@ class ImageClassificationDataLoaderPyTorch:
         image_dims: tuple = (224, 224),
         grayscale: bool = False,
         num_min_samples: int = 500,
+        preset_name: str = None,
+        preset_target_dir: str = None,
+        progress_callback=None,
     ) -> None:
         """
         __init__
@@ -313,7 +322,17 @@ class ImageClassificationDataLoaderPyTorch:
             grayscale (bool, optional): If Grayscale, Select Single Channel, else RGB. Defaults to False.
             num_min_samples (int, optional): Minimum Number of Required Images per Class. Defaults to 500.
         """
+        # If a preset_name is provided, download and prepare that dataset to a
+        # folder-per-class layout and use it as the data_dir. The optional
+        # progress_callback will be called as progress_callback(done, total)
         self.data_dir = data_dir
+        if preset_name is not None:
+            if download_preset_dataset is None:
+                raise RuntimeError("preset dataset downloader is unavailable")
+            target = preset_target_dir or os.path.join("./data", preset_name)
+            # Ensure the directory exists
+            prepared = download_preset_dataset(preset_name, target, progress_callback)
+            self.data_dir = prepared
         self.image_dims = image_dims
         self.grayscale = grayscale
         self.num_min_samples = num_min_samples

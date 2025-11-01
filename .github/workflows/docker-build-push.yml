@@ -88,29 +88,3 @@ jobs:
                   labels: ${{ steps.meta-pytorch.outputs.labels }}
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
-
-            # Both image
-            - name: Extract metadata (both)
-              id: meta-both
-              uses: docker/metadata-action@v5
-              with:
-                  images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-both
-                  tags: |
-                      type=ref,event=branch
-                      type=ref,event=pr
-                      type=semver,pattern={{version}}
-                      type=semver,pattern={{major}}.{{minor}}
-                      type=semver,pattern={{major}}
-                      type=sha,prefix={{branch}}-
-                      type=raw,value=latest,enable={{is_default_branch}}
-
-            - name: Build and push Both image
-              uses: docker/build-push-action@v5
-              with:
-                  context: .
-                  file: Dockerfile.both
-                  push: ${{ github.event_name != 'pull_request' }}
-                  tags: ${{ steps.meta-both.outputs.tags }}
-                  labels: ${{ steps.meta-both.outputs.labels }}
-                  cache-from: type=gha
-                  cache-to: type=gha,mode=max

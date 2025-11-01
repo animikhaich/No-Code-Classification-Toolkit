@@ -82,7 +82,7 @@ Select from:
 ### PyTorch
 Enable/disable using the checkbox:
 - Unchecked: Full Precision (FP32)
-- Checked: Automatic Mixed Precision (AMP) using torch.cuda.amp
+- Checked: Automatic Mixed Precision (AMP) using torch.amp
 
 ## Docker Images
 

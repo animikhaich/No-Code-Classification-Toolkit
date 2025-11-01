@@ -49,6 +49,9 @@ class CustomCallback(tf.keras.callbacks.Callback):
         self.batch_progress = st.progress(0)
         self.status_text = st.empty()
 
+        # Per-batch status text
+        self.batch_text = st.empty()
+
         # Charts
         self.loss_chart = st.empty()
         self.accuracy_chart = st.empty()
@@ -89,7 +92,32 @@ class CustomCallback(tf.keras.callbacks.Callback):
             batch (int): Current batch number
             logs (dict, optional): Training Metrics. Defaults to None.
         """
-        self.batch_progress.progress(batch / self.num_steps)
+        # batch is zero-indexed; show human-friendly 1-based
+        try:
+            done = batch + 1
+            frac = float(done) / float(self.num_steps) if self.num_steps else 0.0
+            self.batch_progress.progress(min(1.0, frac))
+
+            # Extract useful metrics
+            loss = None
+            acc = None
+            if logs is not None:
+                loss = logs.get("loss")
+                acc = logs.get("categorical_accuracy") or logs.get("accuracy")
+
+            # Format the status text similar to PyTorch callback
+            status = f"Train batch: {done}/{self.num_steps}"
+            if loss is not None:
+                status += f" | loss: {loss:.4f}"
+            if acc is not None:
+                status += (
+                    f" | acc: {acc*100:.2f}%" if acc <= 1.0 else f" | acc: {acc:.2f}%"
+                )
+
+            self.batch_text.text(status)
+        except Exception:
+            # keep callback robust
+            pass
 
     def on_epoch_begin(self, epoch, logs=None):
         """
@@ -102,6 +130,40 @@ class CustomCallback(tf.keras.callbacks.Callback):
             logs (dict, optional): Training Metrics. Defaults to None.
         """
         self.epoch_text.text(f"Epoch: {epoch + 1}")
+        try:
+            self.batch_progress.progress(0)
+            self.batch_text.text("")
+        except Exception:
+            pass
+
+    def on_test_batch_end(self, batch, logs=None):
+        """
+        Called at the end of a validation batch (Keras 'test' phase) to update the
+        same batch progress and status text but with 'Val' label.
+        """
+        try:
+            done = batch + 1
+            frac = float(done) / float(self.num_steps) if self.num_steps else 0.0
+            self.batch_progress.progress(min(1.0, frac))
+
+            loss = None
+            acc = None
+            if logs is not None:
+                loss = logs.get("loss")
+                # validation accuracy might be named 'categorical_accuracy' on batch logs
+                acc = logs.get("categorical_accuracy") or logs.get("accuracy")
+
+            status = f"Val batch: {done}/{self.num_steps}"
+            if loss is not None:
+                status += f" | loss: {loss:.4f}"
+            if acc is not None:
+                status += (
+                    f" | acc: {acc*100:.2f}%" if acc <= 1.0 else f" | acc: {acc:.2f}%"
+                )
+
+            self.batch_text.text(status)
+        except Exception:
+            pass
 
     def on_train_begin(self, logs=None):
         """

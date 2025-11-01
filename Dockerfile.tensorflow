@@ -1,4 +1,4 @@
-FROM tensorflow/tensorflow:2.18.0-gpu
+FROM astral/uv:python3.12-bookworm-slim
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -9,7 +9,6 @@ RUN mkdir /app
 WORKDIR /app
 COPY ./requirements-tensorflow.txt /app
 
-RUN pip install uv
 RUN uv pip install -r requirements-tensorflow.txt --system
 COPY . /app
 

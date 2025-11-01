@@ -2,10 +2,13 @@ __author__ = "Animikh Aich"
 __copyright__ = "Copyright 2021, Animikh Aich"
 __credits__ = ["Animikh Aich"]
 __license__ = "MIT"
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __maintainer__ = "Animikh Aich"
 __email__ = "animikhaich@gmail.com"
-__status__ = "staging"
+
+import warnings
+
+warnings.simplefilter("ignore")
 
 import os
 import streamlit as st
@@ -34,16 +37,15 @@ try:
 except ImportError:
     pass
 
+# small helper for Streamlit download progress (shared util lives in add_ons_pytorch)
+try:
+    from utils.add_ons_pytorch import make_streamlit_progress_callback
+except Exception:
+    make_streamlit_progress_callback = None
+
 if not TENSORFLOW_AVAILABLE and not PYTORCH_AVAILABLE:
     st.error("Neither TensorFlow nor PyTorch is available. Please install at least one framework.")
     st.stop()
-
-# TODO: Add Support For Live Training Graphs (on_train_batch_end) without slowing down the Training Process
-# TODO: Add Support For EfficientNet - Fix Data Loader Input to be Un-Normalized Images
-# TODO: Add Support For Experiment and Logs Tracking and Comparison to Past Experiments
-# TODO: Add Support For Dataset Visualization
-# TODO: Add Support for Augmented Batch Visualization
-# TODO: Add Support for Augmentation Hyperparameter Customization (More Granular Control)
 
 
 # Constant Values that are Pre-defined for the dashboard to function
@@ -187,12 +189,33 @@ with st.sidebar:
         st.info("Framework: PyTorch")
 
     # Enter Path for Train and Val Dataset
-    train_data_dir = st.text_input(
-        "Train Data Directory (Absolute Path)",
-    )
-    val_data_dir = st.text_input(
-        "Validation Data Directory (Absolute Path)",
-    )
+    # Dataset source: preset vs custom
+    dataset_source = st.radio("Dataset Source", ["Preset dataset", "Custom paths"], index=1)
+
+    # Preset options
+    PRESET_OPTIONS = ["CIFAR10", "CIFAR100", "MNIST", "FashionMNIST", "STL10"]
+    PRESET_TO_TF = {
+        "CIFAR10": "cifar10",
+        "CIFAR100": "cifar100",
+        "MNIST": "mnist",
+        "FashionMNIST": "fashion_mnist",
+        "STL10": "stl10",
+    }
+    PRESET_TO_TORCH = {k: k for k in PRESET_OPTIONS}
+
+    preset_choice = None
+    preset_target_dir = "./data"
+    if dataset_source == "Preset dataset":
+        preset_choice = st.selectbox("Select preset dataset", PRESET_OPTIONS)
+        preset_target_dir = st.text_input("Preset target directory (where dataset will be written)", "./data")
+        use_same_for_val = st.checkbox("Use same preset for validation (train and val will point to same folder)", value=True)
+        # When using preset, user can still optionally provide custom validation later
+        train_data_dir = preset_target_dir if preset_choice else ""
+        val_data_dir = train_data_dir if use_same_for_val else st.text_input("Validation Data Directory (Absolute Path)")
+    else:
+        # Custom paths: let user input train/val directories
+        train_data_dir = st.text_input("Train Data Directory (Absolute Path)")
+        val_data_dir = st.text_input("Validation Data Directory (Absolute Path)")
 
     # Select Backbone based on framework
     if selected_framework == "TensorFlow":
@@ -233,11 +256,26 @@ if start_training:
     if selected_framework == "TensorFlow":
         # TensorFlow Training Path
         # Init Training Data Loader
+        # Create a Streamlit progress callback if available
+        cb = None
+        if make_streamlit_progress_callback is not None:
+            cb = make_streamlit_progress_callback(prefix="Downloading dataset")
+
+        # If using preset, pass preset args; otherwise pass custom paths
+        tf_preset_name = None
+        tf_preset_target = None
+        if dataset_source == "Preset dataset" and preset_choice:
+            tf_preset_name = PRESET_TO_TF.get(preset_choice)
+            tf_preset_target = preset_target_dir
+
         train_data_loader = ImageClassificationDataLoader(
             data_dir=train_data_dir,
             image_dims=input_shape[:2],
             grayscale=False,
             num_min_samples=100,
+            preset_name=tf_preset_name,
+            preset_target_dir=tf_preset_target,
+            progress_callback=cb,
         )
 
         # Init Validation Data Loader
@@ -246,6 +284,9 @@ if start_training:
             image_dims=input_shape[:2],
             grayscale=False,
             num_min_samples=100,
+            preset_name=tf_preset_name if dataset_source == "Preset dataset" else None,
+            preset_target_dir=tf_preset_target if dataset_source == "Preset dataset" else None,
+            progress_callback=cb,
         )
 
         # Get Training & Validation Dataset Generators
@@ -291,6 +332,9 @@ if start_training:
             image_dims=input_shape[:2],
             grayscale=False,
             num_min_samples=100,
+            preset_name=PRESET_TO_TORCH.get(preset_choice) if dataset_source == "Preset dataset" else None,
+            preset_target_dir=preset_target_dir if dataset_source == "Preset dataset" else None,
+            progress_callback=(make_streamlit_progress_callback(prefix="Downloading dataset") if make_streamlit_progress_callback is not None else None),
         )
 
         # Init Validation Data Loader
@@ -299,6 +343,9 @@ if start_training:
             image_dims=input_shape[:2],
             grayscale=False,
             num_min_samples=100,
+            preset_name=PRESET_TO_TORCH.get(preset_choice) if dataset_source == "Preset dataset" else None,
+            preset_target_dir=preset_target_dir if dataset_source == "Preset dataset" else None,
+            progress_callback=(make_streamlit_progress_callback(prefix="Downloading dataset") if make_streamlit_progress_callback is not None else None),
         )
 
         # Create DataLoaders

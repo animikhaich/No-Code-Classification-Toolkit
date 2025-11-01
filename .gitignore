@@ -144,3 +144,6 @@ model/
 logs*
 old_data/
 test*
+
+
+data
