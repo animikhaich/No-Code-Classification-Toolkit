@@ -19,9 +19,9 @@
     ·
     <a href="https://hub.docker.com/repository/docker/animikhaich/zero-code-tf-classifier">Docker Image</a>
     ·
-    <a href="https://github.com/animikhaich/Zero-Code-TF-Classifier/issues/new">Report Bug</a>
+    <a href="https://github.com/animikhaich/No-Code-Classification-Toolkit/issues/new">Report Bug</a>
     ·
-    <a href="https://github.com/animikhaich/Zero-Code-TF-Classifier/issues/new">Request Feature</a>
+    <a href="https://github.com/animikhaich/No-Code-Classification-Toolkit/issues/new">Request Feature</a>
   </p>
 </p>
 <p align="center">
@@ -54,11 +54,7 @@
 
 ## About The Project
 
-Don't know How to Write Complex Python Programs? Feeling Too Lazy to code a complete Deep Learning Training Pipeline Again? Need to Quickly Prototype an Image Classification Model?
-
-Okay, Let's get to the main part. This is a **Containerized Deep Learning-based Image Classifier Training Tool** that allows anybody with some basic understanding of Hyperparameter Tuning to start training an Image Classification Model.
-
-For the Developer/Contributor: The code is easy to maintain and work with. No Added Complexity. Anyone can download and build a Docker Image to get it up and running with the build script.
+Containerized Tensorflow-based image classification training utility with Streamlit-based interface designed to choose between common architectures and optimizers for quick hyperparameter tuning, which drastically lowers experimentation time.
 
 ## Demo
 
@@ -66,7 +62,7 @@ YouTube Video Link: https://youtu.be/gbuweKMOucc
 
 ## Features
 
-- **Zero Coding Required** - I have said this enough, I will repeat one last time: No need to touch any programming language, just a few clicks and start training!
+- **No Coding Required** - I have said this enough, I will repeat one last time: No need to touch any programming language, just a few clicks and start training!
 - **Easy to use UI Interface** - Built with Streamlit, it is a very user friendly, straight forward UI that anybody can use with ease. Just a few selects and a few sliders, and start training. Simple!
 - **Live and Interactive Plots** - Want to know how your training is progressing? Easy! Visualize and compare the results live, on your dashboard and watch the exponentially decaying loss curve build up from scratch!
 - **Multi-Framework Support** - Now supports both **TensorFlow** and **PyTorch**! Choose the framework that works best for you.
@@ -257,7 +253,7 @@ See the [Changelog](CHANGELOG.md).
 
 ## Roadmap
 
-See the [Open Issues](https://github.com/animikhaich/Zero-Code-TF-Classifier/issues?q=is%3Aopen) for a list of proposed features (and known issues).
+See the [Open Issues](https://github.com/animikhaich/No-Code-Classification-Toolkit/issues?q=is%3Aopen) for a list of proposed features (and known issues).
 
 See the [Changelog](CHANGELOG.md) a lost of changes currently in development.
 
@@ -288,15 +284,15 @@ Distributed under the [GNU AGPL V3 License](https://choosealicense.com/licenses/
 - Twitter: [@AichAnimikh](https://twitter.com/AichAnimikh)
 
 
-[contributors-shield]: https://img.shields.io/github/contributors/animikhaich/Zero-Code-TF-Classifier.svg?style=flat-square
-[contributors-url]: https://github.com/animikhaich/Zero-Code-TF-Classifier/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/animikhaich/Zero-Code-TF-Classifier.svg?style=flat-square
-[forks-url]: https://github.com/animikhaich/Zero-Code-TF-Classifier/network/members
-[stars-shield]: https://img.shields.io/github/stars/animikhaich/Zero-Code-TF-Classifier.svg?style=flat-square
-[stars-url]: https://github.com/animikhaich/Zero-Code-TF-Classifier/stargazers
-[issues-shield]: https://img.shields.io/github/issues/animikhaich/Zero-Code-TF-Classifier.svg?style=flat-square
-[issues-url]: https://github.com/animikhaich/Zero-Code-TF-Classifier/issues
-[license-shield]: https://img.shields.io/github/license/animikhaich/Zero-Code-TF-Classifier.svg?style=flat-square
-[license-url]: https://github.com/animikhaich/Zero-Code-TF-Classifier/blob/main/LICENSE
+[contributors-shield]: https://img.shields.io/github/contributors/animikhaich/No-Code-Classification-Toolkit.svg?style=flat-square
+[contributors-url]: https://github.com/animikhaich/No-Code-Classification-Toolkit/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/animikhaich/No-Code-Classification-Toolkit.svg?style=flat-square
+[forks-url]: https://github.com/animikhaich/No-Code-Classification-Toolkit/network/members
+[stars-shield]: https://img.shields.io/github/stars/animikhaich/No-Code-Classification-Toolkit.svg?style=flat-square
+[stars-url]: https://github.com/animikhaich/No-Code-Classification-Toolkit/stargazers
+[issues-shield]: https://img.shields.io/github/issues/animikhaich/No-Code-Classification-Toolkit.svg?style=flat-square
+[issues-url]: https://github.com/animikhaich/No-Code-Classification-Toolkit/issues
+[license-shield]: https://img.shields.io/github/license/animikhaich/No-Code-Classification-Toolkit.svg?style=flat-square
+[license-url]: https://github.com/animikhaich/No-Code-Classification-Toolkit/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/animikh-aich/
