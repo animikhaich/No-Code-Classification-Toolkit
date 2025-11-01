@@ -69,24 +69,14 @@ class ImageClassificationDataset(Dataset):
         self.labels = []
         for label_idx, label in enumerate(self.LABELS):
             class_dir = os.path.join(self.DATA_DIR, label)
+            class_images = []
             for ext in self.__supported_im_formats:
-                self.image_paths.extend(glob(os.path.join(class_dir, f"*{ext}")))
-                self.image_paths.extend(glob(os.path.join(class_dir, f"*{ext.upper()}")))
-            # Add labels for each image
-            class_images = [p for p in self.image_paths if label in p]
+                class_images.extend(glob(os.path.join(class_dir, f"*{ext}")))
+                class_images.extend(glob(os.path.join(class_dir, f"*{ext.upper()}")))
+            
+            # Add paths and labels for this class
+            self.image_paths.extend(class_images)
             self.labels.extend([label_idx] * len(class_images))
-
-        # Remove duplicate paths
-        unique_paths = []
-        unique_labels = []
-        seen = set()
-        for path, label in zip(self.image_paths, self.labels):
-            if path not in seen:
-                seen.add(path)
-                unique_paths.append(path)
-                unique_labels.append(label)
-        self.image_paths = unique_paths
-        self.labels = unique_labels
 
         # Setup transforms
         self._setup_transforms()
