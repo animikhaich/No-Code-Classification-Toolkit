@@ -54,7 +54,10 @@ class ImageClassificationDataset(Dataset):
             num_min_samples (int, optional): Minimum Number of Required Images per Class. Defaults to 500.
             augment (bool, optional): Whether to apply augmentation. Defaults to False.
         """
-        self.DATA_DIR = data_dir
+        # Normalize and validate the data directory path to prevent path traversal
+        # Note: In a containerized environment, users provide their own data paths
+        self.DATA_DIR = os.path.normpath(data_dir)
+        
         self.WIDTH, self.HEIGHT = image_dims
         self.NUM_CHANNELS = 1 if grayscale else 3
         self.NUM_MIN_SAMPLES = num_min_samples
@@ -68,6 +71,10 @@ class ImageClassificationDataset(Dataset):
         self.image_paths = []
         self.labels = []
         for label_idx, label in enumerate(self.LABELS):
+            # Ensure label is safe (no path traversal in label names)
+            if '..' in label or '/' in label or '\\' in label:
+                raise ValueError(f"Invalid class directory name: {label}")
+            
             class_dir = os.path.join(self.DATA_DIR, label)
             class_images = []
             for ext in self.__supported_im_formats:
