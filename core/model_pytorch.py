@@ -414,7 +414,7 @@ class ImageClassifierPyTorch:
         epoch_acc = 100. * correct / total
         return epoch_loss, epoch_acc
 
-    def train(self, train_loader, val_loader=None, epochs=100, callbacks=None):
+    def train(self, train_loader, val_loader=None, epochs=100, streamlit_callback=None):
         """
         train
 
@@ -424,7 +424,7 @@ class ImageClassifierPyTorch:
             train_loader: PyTorch DataLoader for training
             val_loader: PyTorch DataLoader for validation
             epochs (int): Maximum number of epochs
-            callbacks: Custom callbacks (not implemented yet)
+            streamlit_callback: Custom Streamlit callback for UI updates
 
         Returns:
             dict: Training history
@@ -453,10 +453,18 @@ class ImageClassifierPyTorch:
         print(f"Training on device: {self.device}")
         print(f"Mixed Precision: {self.use_mixed_precision}")
 
+        # Call streamlit callback on train begin
+        if streamlit_callback is not None:
+            streamlit_callback.on_train_begin()
+
         for epoch in range(epochs):
             if self.early_stop:
                 print(f"Early stopping triggered at epoch {epoch+1}")
                 break
+
+            # Call streamlit callback on epoch begin
+            if streamlit_callback is not None:
+                streamlit_callback.on_epoch_begin(epoch)
 
             # Train
             train_loss, train_acc = self.train_epoch(train_loader, epoch)
@@ -468,6 +476,10 @@ class ImageClassifierPyTorch:
                 val_loss, val_acc = self.validate_epoch(val_loader, epoch)
                 self.history['val_loss'].append(val_loss)
                 self.history['val_acc'].append(val_acc)
+
+                # Call streamlit callback on epoch end
+                if streamlit_callback is not None:
+                    streamlit_callback.on_epoch_end(epoch, train_loss, train_acc, val_loss, val_acc)
 
                 # Learning rate scheduling
                 self.scheduler.step(val_acc)
@@ -497,6 +509,10 @@ class ImageClassifierPyTorch:
                 print(f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.2f}%")
                 print(f"Best Val Acc: {self.best_val_acc:.2f}%")
             else:
+                # Call streamlit callback on epoch end (train only)
+                if streamlit_callback is not None:
+                    streamlit_callback.on_epoch_end(epoch, train_loss, train_acc, None, None)
+
                 # TensorBoard logging (train only)
                 if self.writer is not None:
                     self.writer.add_scalar('Loss/train', train_loss, epoch)
@@ -511,6 +527,11 @@ class ImageClassifierPyTorch:
 
         if self.writer is not None:
             self.writer.close()
+
+        # Call streamlit callback on train end
+        if streamlit_callback is not None:
+            final_val_acc = self.best_val_acc if val_loader is not None else None
+            streamlit_callback.on_train_end(final_val_acc=final_val_acc)
 
         return self.history
 

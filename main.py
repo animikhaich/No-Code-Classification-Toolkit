@@ -329,70 +329,13 @@ if start_training:
 
         # Create custom callback for Streamlit
         callback = CustomCallbackPyTorch(num_epochs=selected_epochs)
-        callback.on_train_begin()
 
-        # Start Training with custom callback integration
-        # We need to modify the training loop to use the callback
-        import torch
-
-        # Training history
-        history = {
-            'train_loss': [],
-            'train_acc': [],
-            'val_loss': [],
-            'val_acc': [],
-        }
-
-        for epoch in range(selected_epochs):
-            if classifier.early_stop:
-                break
-
-            callback.on_epoch_begin(epoch)
-
-            # Train
-            train_loss, train_acc = classifier.train_epoch(train_loader, epoch)
-            history['train_loss'].append(train_loss)
-            history['train_acc'].append(train_acc)
-
-            # Validate
-            val_loss, val_acc = classifier.validate_epoch(val_loader, epoch)
-            history['val_loss'].append(val_loss)
-            history['val_acc'].append(val_acc)
-
-            # Update callback with metrics
-            callback.on_epoch_end(epoch, train_loss, train_acc, val_loss, val_acc)
-
-            # Learning rate scheduling
-            classifier.scheduler.step(val_acc)
-
-            # Save best model
-            if val_acc > classifier.best_val_acc:
-                classifier.best_val_acc = val_acc
-                classifier.save_checkpoint(classifier.best_weights_path, is_best=True)
-                classifier.patience_counter = 0
-            else:
-                classifier.patience_counter += 1
-
-            # Early stopping
-            if classifier.patience_counter >= classifier.patience:
-                classifier.early_stop = True
-
-            # TensorBoard logging
-            if classifier.writer is not None:
-                classifier.writer.add_scalar('Loss/train', train_loss, epoch)
-                classifier.writer.add_scalar('Loss/val', val_loss, epoch)
-                classifier.writer.add_scalar('Accuracy/train', train_acc, epoch)
-                classifier.writer.add_scalar('Accuracy/val', val_acc, epoch)
-                classifier.writer.add_scalar('Learning_Rate', classifier.optimizer_obj.param_groups[0]['lr'], epoch)
-
-            # Save checkpoint every epoch
-            classifier.save_checkpoint(classifier.weights_path)
-
-        if classifier.writer is not None:
-            classifier.writer.close()
-
-        callback.on_train_end(final_val_acc=classifier.best_val_acc)
-
-        classifier.history = history
+        # Start Training with callback integration
+        classifier.train(
+            train_loader=train_loader,
+            val_loader=val_loader,
+            epochs=selected_epochs,
+            streamlit_callback=callback,
+        )
 else:
     st.markdown(MARKDOWN_TEXT)
