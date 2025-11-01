@@ -1,0 +1,15 @@
+FROM pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update
+RUN apt-get install -y parallel
+
+RUN mkdir /app
+WORKDIR /app
+COPY ./requirements-pytorch.txt /app
+
+RUN pip install -r requirements-pytorch.txt
+COPY . /app
+
+CMD sh launch.sh

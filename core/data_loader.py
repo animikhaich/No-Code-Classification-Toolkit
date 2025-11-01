@@ -68,7 +68,9 @@ class ImageClassificationDataLoader:
         self.LABELS = []
         self.AUTOTUNE = tf.data.AUTOTUNE
 
-        self.DATA_DIR = data_dir
+        # Normalize and validate the data directory path to prevent path traversal
+        # Note: In a containerized environment, users provide their own data paths
+        self.DATA_DIR = os.path.normpath(data_dir)
         self.WIDTH, self.HEIGHT = image_dims
         self.NUM_CHANNELS = 1 if grayscale else 3
         self.NUM_MIN_SAMPLES = num_min_samples
@@ -102,6 +104,10 @@ class ImageClassificationDataLoader:
         format_issues = {}
         quant_issues = {}
         for label in self.LABELS:
+            # Ensure label is safe (no path traversal in label names)
+            if '..' in label or '/' in label or '\\' in label:
+                raise ValueError(f"Invalid class directory name: {label}")
+                
             paths = glob(os.path.join(self.DATA_DIR, label, "*"))
 
             format_issues[label] = [

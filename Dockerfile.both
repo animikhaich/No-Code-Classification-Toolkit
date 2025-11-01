@@ -1,0 +1,23 @@
+FROM nvidia/cuda:12.4.0-cudnn-runtime-ubuntu22.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Install Python and necessary tools
+RUN apt-get update && apt-get install -y \
+    python3.10 \
+    python3-pip \
+    parallel \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create app directory
+RUN mkdir /app
+WORKDIR /app
+
+# Copy requirements and install dependencies
+COPY ./requirements-both.txt /app
+RUN pip install --no-cache-dir -r requirements-both.txt
+
+# Copy application files
+COPY . /app
+
+CMD sh launch.sh
